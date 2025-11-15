@@ -105,7 +105,7 @@ A developer builds user interfaces using the Material UI component library integ
 #### Repository Setup
 - **FR-001**: Repository MUST be initialized as a monorepo using PNPM workspaces for package management
 - **FR-002**: Repository MUST include a root `package.json` with workspace configuration pointing to `packages/*`
-- **FR-003**: Repository MUST include bilingual README files (README.md in English and README.ru.md in Russian) with identical structure and line count
+- **FR-003**: Repository MUST include bilingual README files (README.md in English and README-RU.md in Russian) with identical structure and line count
 - **FR-004**: Repository MUST include a `.gitignore` file appropriate for Node.js, Svelte, and TypeScript projects
 - **FR-005**: Repository MUST include issue labels following the guidelines in `.github/instructions/github-labels.md`
 
@@ -150,6 +150,10 @@ A developer builds user interfaces using the Material UI component library integ
 - **FR-031**: Project structure MUST NOT include legacy code or incomplete implementations from reference project
 - **FR-032**: Project MUST NOT include separate `docs/` directory (documentation will be external)
 - **FR-033**: Project MUST NOT include pre-created AI agent rules (user will create as needed)
+
+#### Development Process
+- **FR-034**: Development team MUST conduct step-by-step analysis of Universo Platformo React repository (https://github.com/teknokomo/universo-platformo-react) structure before implementing each major feature component to understand architectural patterns and requirements
+- **FR-035**: Before implementing any feature from a specification, a GitHub Issue MUST be created following `.github/instructions/github-issues.md` guidelines and linked to the corresponding Pull Request
 
 ### Key Entities
 
@@ -197,6 +201,8 @@ A developer builds user interfaces using the Material UI component library integ
 - **SC-019**: Repository has zero critical security vulnerabilities in dependencies
 - **SC-020**: Build process completes in under 2 minutes for typical changes
 - **SC-021**: All configured development tools run successfully without errors
+- **SC-022**: Development team demonstrates understanding of React repository architectural patterns through documented analysis before implementing major features
+- **SC-023**: All feature implementations have corresponding GitHub Issues created before development begins
 
 ## Assumptions
 
