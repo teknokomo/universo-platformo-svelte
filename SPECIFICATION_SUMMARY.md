@@ -89,7 +89,9 @@ The specification is complete and validated. You can now proceed with:
 
 ## Branch Access
 
-To work with the feature branch:
+The feature branch `001-initial-setup` has been created locally with the specification. The spec files are also present on the current working branch (`copilot/setup-universo-platformo-svelte`).
+
+To work with the feature branch locally:
 
 ```bash
 # View the branch
@@ -101,6 +103,8 @@ cat specs/001-initial-setup/spec.md
 # View the checklist
 cat specs/001-initial-setup/checklists/requirements.md
 ```
+
+**Note**: The `001-initial-setup` branch exists locally but has not been pushed to remote. The specification files are available on both branches for easy access.
 
 ## Notes
 
