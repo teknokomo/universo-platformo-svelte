@@ -91,12 +91,38 @@ A developer builds user interfaces using the Material UI component library integ
 ### Edge Cases
 
 - What happens when a developer tries to create a package without following the naming convention (missing `-frt` or `-srv` suffix)?
+  - **Handling**: Build validation scripts MUST detect non-compliant package names and provide clear error messages indicating the correct naming pattern
+  - **Validation**: Automated checks in CI/CD pipeline MUST enforce naming conventions before merge
+  
 - How does the system handle when Supabase credentials are missing or invalid during development?
+  - **Handling**: Application MUST fail gracefully at startup with clear error message indicating which credentials are missing
+  - **Validation**: Environment validation script MUST check for required credentials before starting development server
+  - **Fallback**: Development mode MUST support optional mock authentication for frontend-only development
+  
 - What happens when workspace dependencies have version conflicts?
+  - **Handling**: PNPM MUST report version conflicts during installation with clear resolution suggestions
+  - **Validation**: Lock file (pnpm-lock.yaml) MUST be committed to ensure reproducible builds
+  - **Resolution**: Project MUST maintain dependency version consistency through workspace constraints
+  
 - How does the build process handle when a package is missing its `base/` directory?
+  - **Handling**: Build scripts MUST verify presence of base/ directory in each package before compilation
+  - **Validation**: Package structure validation script MUST run during pre-build phase
+  - **Error**: Clear error message MUST indicate which package is missing required structure
+  
 - What happens when documentation updates are made to only one language version?
+  - **Handling**: Pre-commit hooks MUST detect line count mismatches between README.md and README-RU.md
+  - **Validation**: Automated line count comparison script MUST run during CI checks
+  - **Prevention**: Documentation update checklist MUST remind developers to update both versions
+  
 - How does the authentication system handle expired or invalid tokens?
+  - **Handling**: Middleware MUST intercept expired tokens and redirect to login with appropriate message
+  - **Validation**: Token refresh mechanism MUST attempt renewal before expiration
+  - **Fallback**: Session cleanup MUST occur on authentication failure
+  
 - What happens when PNPM workspace protocol references a non-existent package?
+  - **Handling**: PNPM MUST fail installation with clear error indicating missing workspace dependency
+  - **Validation**: Package dependency audit script MUST verify all workspace references exist
+  - **Prevention**: Package creation template MUST include validation checklist
 
 ## Requirements *(mandatory)*
 
@@ -163,6 +189,597 @@ A developer builds user interfaces using the Material UI component library integ
 - **Authentication Session**: Managed by Passport.js; linked to Supabase user; persists across requests; provides user context to application
 - **Configuration**: Environment-specific settings; includes Supabase credentials; includes authentication settings; shared across packages where appropriate
 
+## Technical Standards and Patterns *(mandatory)*
+
+### Package Structure Pattern
+
+Each package in the monorepo MUST follow this standardized directory structure:
+
+```
+packages/
+├── [feature-name]-frt/          # Frontend package
+│   ├── base/                     # Base implementation directory
+│   │   ├── src/                  # Source code
+│   │   │   ├── components/       # Svelte components
+│   │   │   ├── stores/           # Svelte stores
+│   │   │   ├── utils/            # Utility functions
+│   │   │   └── index.ts          # Package entry point
+│   │   ├── package.json          # Package dependencies
+│   │   ├── tsconfig.json         # TypeScript configuration
+│   │   └── README.md             # Package documentation
+│   └── README.md                 # Package overview
+│
+└── [feature-name]-srv/          # Backend package
+    ├── base/                     # Base implementation directory
+    │   ├── src/                  # Source code
+    │   │   ├── routes/           # API routes
+    │   │   ├── services/         # Business logic
+    │   │   ├── models/           # Data models
+    │   │   ├── middleware/       # Express middleware
+    │   │   └── index.ts          # Package entry point
+    │   ├── package.json          # Package dependencies
+    │   ├── tsconfig.json         # TypeScript configuration
+    │   └── README.md             # Package documentation
+    └── README.md                 # Package overview
+```
+
+**Naming Conventions**:
+- Package names MUST use kebab-case: `feature-name-frt`, `feature-name-srv`
+- Frontend packages MUST end with `-frt` suffix
+- Backend packages MUST end with `-srv` suffix
+- Package names MUST be descriptive and reflect the feature domain
+
+**base/ Directory Rationale**:
+The `base/` directory enables future support for multiple implementations of the same functionality using different technology stacks or approaches, while maintaining consistent package naming and structure at the parent level.
+
+### PNPM Workspace Configuration
+
+**Workspace Protocol Usage**:
+```json
+{
+  "dependencies": {
+    "@universo/clusters-frt": "workspace:*",
+    "@universo/clusters-srv": "workspace:*"
+  }
+}
+```
+
+**Key Requirements**:
+- All internal package references MUST use `workspace:*` protocol
+- External dependencies MUST specify explicit version ranges
+- Package names MUST include organization scope: `@universo/package-name`
+- Root workspace configuration MUST define `packages/*` pattern
+
+**Example Root package.json**:
+```json
+{
+  "name": "@universo/platformo-svelte",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "pnpm@8.0.0"
+}
+```
+
+### Centralized Configuration Pattern
+
+**Configuration Structure**:
+```
+packages/
+└── core-config/
+    ├── base/
+    │   ├── src/
+    │   │   ├── database.config.ts      # Database connections
+    │   │   ├── auth.config.ts          # Authentication settings
+    │   │   ├── theme.config.ts         # UI theme configuration
+    │   │   ├── env.config.ts           # Environment variables
+    │   │   └── index.ts                # Unified config exports
+    │   └── package.json
+```
+
+**Configuration Access Pattern**:
+```typescript
+// In any package
+import { databaseConfig, authConfig, themeConfig } from '@universo/core-config';
+
+// Use centralized configuration
+const supabase = createClient(
+  databaseConfig.url,
+  databaseConfig.anonKey
+);
+```
+
+**Configuration Requirements**:
+- Environment variables MUST be loaded from `.env` files (not committed)
+- Configuration MUST support multiple environments (development, staging, production)
+- Secrets MUST NEVER be hardcoded in configuration files
+- Configuration types MUST be defined with TypeScript interfaces
+
+### Authentication Architecture Pattern
+
+**Reusable Authentication Structure**:
+```
+packages/
+└── auth-srv/
+    ├── base/
+    │   ├── src/
+    │   │   ├── strategies/
+    │   │   │   └── supabase.strategy.ts   # Passport Supabase strategy
+    │   │   ├── middleware/
+    │   │   │   ├── authenticate.ts        # Auth middleware
+    │   │   │   └── authorize.ts           # Authorization middleware
+    │   │   ├── services/
+    │   │   │   ├── session.service.ts     # Session management
+    │   │   │   └── token.service.ts       # Token operations
+    │   │   └── index.ts
+```
+
+**Authentication Pattern Requirements**:
+- Authentication logic MUST be centralized in `auth-srv` package
+- All packages requiring authentication MUST import from `@universo/auth-srv`
+- Session management MUST use server-side storage (not client-only)
+- Token refresh MUST be handled automatically by middleware
+- Authentication state MUST be shared via Svelte stores in frontend
+
+### Build Scripts Pattern
+
+**Cross-Package Build Configuration**:
+
+Root `package.json` scripts:
+```json
+{
+  "scripts": {
+    "build": "pnpm -r --filter './packages/*' run build",
+    "build:frt": "pnpm -r --filter './packages/*-frt' run build",
+    "build:srv": "pnpm -r --filter './packages/*-srv' run build",
+    "dev": "pnpm -r --parallel --filter './packages/*' run dev",
+    "test": "pnpm -r --filter './packages/*' run test",
+    "lint": "pnpm -r --filter './packages/*' run lint",
+    "type-check": "pnpm -r --filter './packages/*' run type-check"
+  }
+}
+```
+
+**Build Requirements**:
+- Each package MUST have `build`, `dev`, `test`, and `lint` scripts
+- Build order MUST respect dependency graph (backend before frontend for shared types)
+- Build artifacts MUST be output to package-specific `dist/` directories
+- Build process MUST include TypeScript compilation and type checking
+- Failed builds in any package MUST stop the entire build process
+
+### TypeScript and Code Quality Standards
+
+**TypeScript Configuration**:
+- `strict: true` MUST be enabled in all tsconfig.json files
+- `noImplicitAny: true` MUST be enforced
+- `esModuleInterop: true` for better module compatibility
+- Shared base configuration MUST be extended from root tsconfig.base.json
+
+**Linting Standards**:
+- ESLint MUST be configured with Svelte and TypeScript support
+- Prettier MUST be used for code formatting
+- Pre-commit hooks MUST run linting and formatting
+- Configuration files:
+  - `.eslintrc.js` - ESLint rules
+  - `.prettierrc` - Prettier formatting
+  - `.editorconfig` - Editor settings
+
+**Best Practices Reference**:
+- Svelte Best Practices: https://svelte.dev/docs/svelte/best-practices
+- TypeScript Best Practices: https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html
+- Monorepo Best Practices: https://pnpm.io/workspaces
+
+### Database Extensibility Pattern
+
+**Abstraction Layer Structure**:
+```typescript
+// Database abstraction interface
+interface IDatabaseAdapter {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  query<T>(sql: string, params?: any[]): Promise<T[]>;
+  transaction<T>(callback: () => Promise<T>): Promise<T>;
+}
+
+// Supabase implementation
+class SupabaseAdapter implements IDatabaseAdapter {
+  // Implementation details
+}
+
+// Future: PostgreSQL direct implementation
+class PostgreSQLAdapter implements IDatabaseAdapter {
+  // Implementation details
+}
+```
+
+**Extensibility Requirements**:
+- All database operations MUST use abstraction interface
+- Database-specific features MUST be documented as implementation details
+- Business logic MUST NOT depend on Supabase-specific APIs
+- Migration path to other databases MUST be documented
+
+### Material UI Integration Specification
+
+**Recommended Library**: Svelte Material UI (SMUI)
+- Repository: https://github.com/hperrin/svelte-material-ui
+- Documentation: https://sveltematerialui.com/
+
+**Alternative Consideration**: If SMUI proves unmaintained or incompatible, evaluate:
+1. Skeleton UI (Tailwind-based alternative)
+2. Custom Material Design implementation
+3. Carbon Components Svelte
+
+**Theme Configuration Pattern**:
+```typescript
+// packages/ui-theme/base/src/theme.config.ts
+export const theme = {
+  palette: {
+    primary: { main: '#1976d2', light: '#42a5f5', dark: '#1565c0' },
+    secondary: { main: '#9c27b0', light: '#ba68c8', dark: '#7b1fa2' },
+    error: { main: '#d32f2f' },
+    warning: { main: '#ffa726' },
+    info: { main: '#0288d1' },
+    success: { main: '#2e7d32' }
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontSize: 14
+  },
+  spacing: 8
+};
+```
+
+### Clusters Pattern Specification
+
+**Base Pattern Structure**:
+The Clusters pattern establishes a three-level hierarchical entity structure that serves as the foundation for similar features throughout the application.
+
+**Entity Hierarchy**:
+```
+Cluster (Top Level)
+├── Domain (Middle Level)
+│   ├── Resource (Bottom Level)
+│   ├── Resource
+│   └── Resource
+├── Domain
+│   └── Resource
+```
+
+**Pattern Application Examples**:
+- **Clusters Feature**: Clusters → Domains → Resources
+- **Metaverses Feature**: Metaverses → Sections → Entities
+- **Uniks Feature**: Uniks → Categories → Items (+ additional levels)
+
+**Entity Relationships**:
+- One Cluster contains many Domains (1:N)
+- One Domain contains many Resources (1:N)
+- Resources are the leaf nodes with no children
+- Each level MUST support CRUD operations
+- Each level MUST support hierarchical navigation
+
+**Database Schema Pattern**:
+```sql
+-- Top level entity
+CREATE TABLE clusters (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Middle level entity
+CREATE TABLE domains (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  cluster_id UUID REFERENCES clusters(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Bottom level entity
+CREATE TABLE resources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  domain_id UUID REFERENCES domains(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  resource_type VARCHAR(100),
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**UI Component Pattern**:
+- List view for each level showing child entities
+- Detail view for individual entity CRUD operations
+- Breadcrumb navigation showing hierarchy path
+- Tree view for visualizing entire hierarchy
+
+**Implementation Priority**:
+1. Implement Clusters pattern as the reference implementation
+2. Document patterns and reusable components
+3. Apply pattern to Metaverses with minor variations
+4. Extend pattern to Uniks with additional levels
+
+### Step-by-Step React Repository Analysis Process
+
+**Analysis Workflow**:
+
+1. **Initial Repository Scan** (Before any feature implementation):
+   - Clone Universo Platformo React repository
+   - Review repository structure and package organization
+   - Document monorepo patterns and conventions
+   - Identify core packages and their purposes
+   - Map dependencies between packages
+
+2. **Feature-Specific Analysis** (Before each major feature):
+   - Locate feature implementation in React repository
+   - Document component hierarchy and data flow
+   - Identify API endpoints and database schemas
+   - Extract business logic and validation rules
+   - Note UI/UX patterns and user workflows
+   - Document any Flowise legacy code to avoid
+
+3. **Pattern Extraction**:
+   - Identify reusable architectural patterns
+   - Document authentication and authorization patterns
+   - Extract database access patterns
+   - Note state management approaches
+   - Document API design patterns
+
+4. **Translation to Svelte**:
+   - Map React components to Svelte equivalents
+   - Adapt state management (React state → Svelte stores)
+   - Convert class components to Svelte functional patterns
+   - Update routing (React Router → SvelteKit routing)
+   - Adapt build configuration for Svelte tooling
+
+5. **Documentation**:
+   - Create analysis document in specs directory
+   - Document differences between React and Svelte implementations
+   - Note improvements and optimizations
+   - Reference original React implementation for context
+
+**Analysis Output Template**:
+```markdown
+# Feature Analysis: [Feature Name]
+
+## React Implementation Reference
+- Location: packages/[package-name]
+- Key files: [list]
+- Dependencies: [list]
+
+## Business Logic Extracted
+- [List core business rules]
+
+## Database Schema
+- [Document tables and relationships]
+
+## API Endpoints
+- [List endpoints and contracts]
+
+## UI Components Identified
+- [List main components]
+
+## Svelte Translation Plan
+- [Document adaptation strategy]
+
+## Improvements from React Version
+- [List planned improvements]
+```
+
+### Legacy Code Definition
+
+**Explicitly Defined Legacy Code**:
+1. **Flowise Integration Code**: Any code in React repository related to Flowise workflow builder that has not been fully refactored
+2. **Incomplete Migrations**: Code marked with TODO, FIXME, or HACK comments
+3. **Deprecated Patterns**: Code using outdated libraries or patterns marked for replacement
+4. **Temporary Workarounds**: Code with comments indicating temporary solutions
+5. **Unused Dependencies**: Packages imported but not used in production code
+
+**Incomplete Implementations Definition**:
+1. **Partial Features**: Features with UI but no backend, or vice versa
+2. **Missing Validation**: CRUD operations without proper validation
+3. **Unimplemented Error Handling**: Code without try-catch or error boundaries
+4. **Missing Tests**: Features without corresponding test coverage
+5. **Undocumented APIs**: Endpoints without API documentation
+
+**Verification Approach**:
+- Review React repository issues for known legacy code areas
+- Check git blame for recent refactoring commits
+- Look for deprecation warnings in console/logs
+- Identify files with high churn rate indicating instability
+
+### Validation Approaches *(mandatory)*
+
+#### Bilingual Documentation Line Count Validation
+
+**Automated Validation Script**:
+```bash
+#!/bin/bash
+# scripts/validate-bilingual-docs.sh
+
+for readme in $(find . -name "README.md"); do
+  readme_ru="${readme%.md}-RU.md"
+  
+  if [ -f "$readme_ru" ]; then
+    lines_en=$(wc -l < "$readme")
+    lines_ru=$(wc -l < "$readme_ru")
+    
+    if [ "$lines_en" -ne "$lines_ru" ]; then
+      echo "ERROR: Line count mismatch"
+      echo "  EN: $readme ($lines_en lines)"
+      echo "  RU: $readme_ru ($lines_ru lines)"
+      exit 1
+    fi
+  else
+    echo "ERROR: Missing Russian translation for $readme"
+    exit 1
+  fi
+done
+
+echo "✓ All bilingual documentation validated"
+```
+
+**CI Integration**:
+- Script MUST run in GitHub Actions on every PR
+- PR MUST be blocked if validation fails
+- Validation report MUST be posted as PR comment
+
+**Pre-commit Hook**:
+```bash
+# .husky/pre-commit
+#!/bin/sh
+./scripts/validate-bilingual-docs.sh
+```
+
+#### Package Structure Compliance Validation
+
+**Structure Validation Script**:
+```bash
+#!/bin/bash
+# scripts/validate-package-structure.sh
+
+for package in packages/*; do
+  # Check naming convention
+  if [[ ! "$package" =~ -frt$ ]] && [[ ! "$package" =~ -srv$ ]]; then
+    echo "ERROR: Package $package does not follow naming convention"
+    echo "  Packages must end with -frt or -srv"
+    exit 1
+  fi
+  
+  # Check base/ directory exists
+  if [ ! -d "$package/base" ]; then
+    echo "ERROR: Package $package missing base/ directory"
+    exit 1
+  fi
+  
+  # Check required files
+  required_files=("base/package.json" "base/tsconfig.json" "base/README.md")
+  for file in "${required_files[@]}"; do
+    if [ ! -f "$package/$file" ]; then
+      echo "ERROR: Package $package missing required file: $file"
+      exit 1
+    fi
+  done
+  
+  # Check src/ directory exists
+  if [ ! -d "$package/base/src" ]; then
+    echo "ERROR: Package $package missing base/src/ directory"
+    exit 1
+  fi
+done
+
+echo "✓ All packages follow structure requirements"
+```
+
+**IDE Integration**:
+- VSCode workspace settings MUST include structure validation
+- Yeoman generator template MUST create compliant structure
+- Documentation MUST include structure checklist
+
+#### Workspace Dependency Resolution Validation
+
+**Dependency Audit Script**:
+```bash
+#!/bin/bash
+# scripts/validate-workspace-deps.sh
+
+# Verify all workspace dependencies exist
+for package in packages/*/base/package.json; do
+  workspace_deps=$(jq -r '.dependencies // {} | to_entries[] | select(.value | startswith("workspace:")) | .key' "$package")
+  
+  for dep in $workspace_deps; do
+    dep_name="${dep#@universo/}"
+    
+    # Check if referenced package exists
+    if [ ! -d "packages/$dep_name" ]; then
+      echo "ERROR: Package dependency not found"
+      echo "  Package: $package"
+      echo "  Missing dependency: $dep ($dep_name)"
+      exit 1
+    fi
+  done
+done
+
+# Verify no version conflicts
+pnpm list --depth=0 > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "ERROR: Workspace dependency conflicts detected"
+  pnpm list --depth=0
+  exit 1
+fi
+
+echo "✓ All workspace dependencies validated"
+```
+
+**Lock File Validation**:
+- pnpm-lock.yaml MUST be committed
+- Lock file MUST be validated in CI
+- Outdated dependencies MUST be flagged by Dependabot
+
+#### Authentication Flow Validation
+
+**Integration Test Suite**:
+```typescript
+// tests/integration/auth-flow.test.ts
+describe('Authentication Flow', () => {
+  test('successful login with valid credentials', async () => {
+    const response = await request(app)
+      .post('/auth/login')
+      .send({ email: 'test@example.com', password: 'password' });
+    
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('token');
+    expect(response.body).toHaveProperty('user');
+  });
+  
+  test('token refresh before expiration', async () => {
+    const token = await getValidToken();
+    const response = await request(app)
+      .post('/auth/refresh')
+      .set('Authorization', `Bearer ${token}`);
+    
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('token');
+  });
+  
+  test('expired token handling', async () => {
+    const expiredToken = await getExpiredToken();
+    const response = await request(app)
+      .get('/api/protected')
+      .set('Authorization', `Bearer ${expiredToken}`);
+    
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty('error', 'Token expired');
+  });
+  
+  test('session persistence across requests', async () => {
+    const agent = request.agent(app);
+    
+    // Login
+    await agent
+      .post('/auth/login')
+      .send({ email: 'test@example.com', password: 'password' });
+    
+    // Verify session persists
+    const response = await agent.get('/api/user/profile');
+    expect(response.status).toBe(200);
+  });
+});
+```
+
+**Manual Test Checklist**:
+- [ ] User can log in with valid Supabase credentials
+- [ ] User session persists after page refresh
+- [ ] User is redirected to login when accessing protected routes unauthenticated
+- [ ] User can log out and session is cleared
+- [ ] Token refresh happens automatically before expiration
+- [ ] Expired token triggers re-authentication flow
+
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
@@ -203,6 +820,72 @@ A developer builds user interfaces using the Material UI component library integ
 - **SC-021**: All configured development tools run successfully without errors
 - **SC-022**: Development team demonstrates understanding of React repository architectural patterns through documented analysis before implementing major features
 - **SC-023**: All feature implementations have corresponding GitHub Issues created before development begins
+
+## Definitions and Terminology *(mandatory)*
+
+### Base Functionality
+
+"Base functionality" refers to the foundational infrastructure that must be established before implementing feature-specific functionality:
+
+1. **Repository Infrastructure**:
+   - Monorepo setup with PNPM workspace configuration
+   - Package structure patterns and naming conventions
+   - Build, lint, and test script configuration
+   - TypeScript and Svelte tooling setup
+
+2. **Development Environment**:
+   - Local development server with hot module replacement
+   - Environment configuration management
+   - Development tooling (ESLint, Prettier, etc.)
+   - Git hooks for pre-commit validation
+
+3. **Core Packages**:
+   - `core-config`: Centralized configuration management
+   - `auth-srv`: Authentication and authorization services
+   - `ui-theme`: Material UI theme and styling configuration
+   - `db-client`: Database connection and query abstraction
+
+4. **Documentation Foundation**:
+   - Root README files (English and Russian)
+   - Contribution guidelines
+   - Package creation templates
+   - Development workflow documentation
+
+**What is NOT Base Functionality**:
+- Business domain features (Clusters, Metaverses, Uniks)
+- User-facing UI pages and forms
+- Specific database schemas for business entities
+- Advanced features like LangChain integration or graph nodes
+
+### Clusters Pattern
+
+The Clusters pattern is the reference implementation for hierarchical entity management. See "Clusters Pattern Specification" in the Technical Standards and Patterns section for complete details.
+
+**Summary**: A three-level hierarchy (Cluster → Domain → Resource) that establishes reusable patterns for entity CRUD operations, hierarchical navigation, and database relationships.
+
+### Centralized Configuration
+
+Configuration that is defined once and reused across all packages in the monorepo. See "Centralized Configuration Pattern" in the Technical Standards and Patterns section for implementation details.
+
+**Components**:
+- Database connection settings
+- Authentication configuration
+- UI theme and styling
+- Environment variable management
+- Feature flags and runtime settings
+
+### Best Practices
+
+Coding standards and patterns that ensure consistency, maintainability, and quality. See "TypeScript and Code Quality Standards" in the Technical Standards and Patterns section for specific standards.
+
+**Categories**:
+- Svelte component patterns and conventions
+- TypeScript type safety and strict mode
+- Code formatting and linting rules
+- Testing patterns and coverage requirements
+- Documentation standards
+- Git commit message format
+- Code review guidelines
 
 ## Assumptions
 
