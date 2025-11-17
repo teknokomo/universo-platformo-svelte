@@ -1,27 +1,38 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version Change: 0.0.0 → 1.0.0
-Rationale: MAJOR version - Initial constitution establishment with complete governance framework
+Version Change: 1.0.0 → 1.1.0
+Rationale: MINOR version - Added new principle VIII (Shared Package Architecture) and expanded Technology Stack
 
-Modified Principles: N/A (Initial version)
+Modified Principles:
+  - Added Principle VIII: Shared Package Architecture and Dependency Management
+  - Expanded Technology Stack Requirements: Added build tools specification
+
 Added Sections:
-  - Core Principles (7 principles)
-  - Technology Stack Requirements
-  - Development Workflow
-  - Governance
+  - Core Principles now includes 8 principles (was 7)
+  - Technology Stack Requirements expanded with build tools
 
 Templates Status:
-  ✅ .specify/templates/plan-template.md - Reviewed, constitution check section aligns
-  ✅ .specify/templates/spec-template.md - Reviewed, requirements align with principles
-  ✅ .specify/templates/tasks-template.md - Reviewed, task organization aligns with workflow
-  ✅ .github/instructions/github-issues.md - Reviewed, bilingual requirements aligned
-  ✅ .github/instructions/github-labels.md - Reviewed, compliant with principles
-  ✅ .github/instructions/github-pr.md - Reviewed, compliant with principles
-  ✅ .github/instructions/i18n-docs.md - Reviewed, bilingual documentation principles aligned
+  ✅ .specify/templates/plan-template.md - No changes required
+  ✅ .specify/templates/spec-template.md - Compatible with new shared package requirements
+  ✅ .specify/templates/tasks-template.md - No changes required
+  ✅ .github/instructions/github-issues.md - No changes required
+  ✅ .github/instructions/github-labels.md - No changes required
+  ✅ .github/instructions/github-pr.md - No changes required
+  ✅ .github/instructions/i18n-docs.md - No changes required
 
-Follow-up TODOs: None - All placeholders filled with concrete values
+Follow-up TODOs:
+  - Create shared packages (@universo/types, @universo/utils, @universo/api-client, @universo/i18n) during initial setup
+  - Configure PNPM catalog in pnpm-workspace.yaml
+  - Set up tsdown configuration for library packages
+
+Previous Changes:
+==================
+Version 0.0.0 → 1.0.0
+Rationale: MAJOR version - Initial constitution establishment with complete governance framework
+Added Sections: Core Principles (7 principles), Technology Stack Requirements, Development Workflow, Governance
 -->
+
 
 # Universo Platformo Svelte Constitution
 
@@ -69,15 +80,22 @@ Development MUST start with foundational repository structure, then implement ba
 
 **Rationale**: Establishing proven patterns first reduces complexity, ensures consistency, and accelerates development of similar features through reusable architectural patterns.
 
+### VIII. Shared Package Architecture and Dependency Management
+
+The project MUST maintain shared utility packages to eliminate code duplication and ensure consistency. Required shared packages include: `@universo/types` (TypeScript types and Zod schemas), `@universo/utils` (utilities with browser/server separation), `@universo/api-client` (type-safe API client), and `@universo/i18n` (centralized i18n instance). All packages MUST use the `@universo/` organization scope prefix. Dependency versions MUST be managed through PNPM catalog feature in `pnpm-workspace.yaml` to ensure version consistency across all packages. Feature packages MUST import from shared packages rather than duplicate code.
+
+**Rationale**: Shared packages eliminate code duplication across 20+ feature packages, ensure type safety between frontend and backend, prevent dependency version drift, and create reusable building blocks that accelerate development while maintaining consistency.
+
 ## Technology Stack Requirements
 
 ### Required Technologies
 - **Frontend Framework**: Svelte with SvelteKit
 - **Language**: TypeScript (strict mode)
-- **Package Manager**: PNPM (workspace configuration)
+- **Package Manager**: PNPM (workspace configuration with catalog for dependency management)
+- **Build Tools**: tsdown for library packages, Vite for applications, Turborepo (optional) for build orchestration
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: Passport.js with Supabase connector
-- **UI Library**: MUI (Material UI for Svelte)
+- **UI Library**: MUI (Material UI for Svelte) or equivalent Svelte-compatible Material Design library
 - **Version Control**: Git with GitHub
 
 ### Prohibited Practices
@@ -135,4 +153,4 @@ This constitution supersedes all other practices and conventions within the Univ
 ### Version Control
 This constitution uses semantic versioning. All changes MUST be tracked with clear rationale. Amendment history MUST be preserved in git history and Sync Impact Reports.
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-15 | **Last Amended**: 2025-11-15
+**Version**: 1.1.0 | **Ratified**: 2025-11-15 | **Last Amended**: 2025-11-17
