@@ -1,6 +1,6 @@
 # Quickstart Guide: Universo Platformo Svelte
 
-**Last Updated**: 2025-11-17  
+**Last Updated**: 2025-11-17 (Enhanced with 2024-2025 best practices)  
 **Target Audience**: Developers setting up local development environment
 
 ## Prerequisites
@@ -259,6 +259,17 @@ Then run:
 pnpm install
 ```
 
+**Migrate to PNPM Catalogs** (one-time):
+```bash
+# Automatically migrate existing workspace to use catalog feature
+pnpx codemod pnpm/catalog
+```
+
+This codemod will:
+- Extract common dependency versions to catalog
+- Update all package.json files to reference catalog
+- Maintain existing version constraints
+
 ---
 
 ## Common Commands
@@ -374,11 +385,21 @@ After successful setup:
 - [SvelteKit Documentation](https://kit.svelte.dev/docs)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 - [PNPM Workspace Guide](https://pnpm.io/workspaces)
+- [PNPM Catalogs Feature](https://pnpm.io/catalogs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Material UI for Svelte](https://sveltematerialui.com/)
+- [Material UI for Svelte (SMUI)](https://sveltematerialui.com/)
+- [Skeleton UI (Alternative)](https://www.skeleton.dev/)
+- [Melt UI (Headless Components)](https://melt-ui.com/)
+
+### Deployment Resources
+- [SvelteKit Adapters](https://kit.svelte.dev/docs/adapters) - Deploy to various platforms
+- [Adapter Node](https://github.com/sveltejs/kit/tree/main/packages/adapter-node)
+- [Adapter Vercel](https://github.com/sveltejs/kit/tree/main/packages/adapter-vercel)
+- [Adapter Netlify](https://github.com/sveltejs/kit/tree/main/packages/adapter-netlify)
+- [Adapter Static](https://github.com/sveltejs/kit/tree/main/packages/adapter-static)
 
 ---
 
-**Version**: 0.1.0  
+**Version**: 0.1.0 (Enhanced with 2024-2025 patterns)  
 **Last Updated**: 2025-11-17  
 **Maintainers**: Universo Platformo Team

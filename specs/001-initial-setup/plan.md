@@ -1,102 +1,37 @@
-# Implementation Plan: Initial Setup and Architecture
+# Implementation Plan: [FEATURE]
 
-**Branch**: `001-initial-setup` | **Date**: 2025-11-17 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-initial-setup/spec.md`
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Establish foundational repository infrastructure for Universo Platformo Svelte as a monorepo with PNPM workspace management, package structure patterns, Supabase integration, Passport.js authentication, and Material UI. This includes creating shared utility packages, setting up build tooling with TypeScript, and establishing bilingual documentation standards.
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.8.3, Svelte 4.2.0+, SvelteKit 2.0.0+  
-**Primary Dependencies**: 
-- Frontend: Svelte, SvelteKit, Material UI for Svelte (SMUI or equivalent)
-- Backend: Node.js, Passport.js, Supabase client
-- Monorepo: PNPM 8.0.0+ with workspace and catalog features
-- Build: tsdown for libraries, Vite 5.4.19+ for applications, optionally Turborepo
-- Validation: Zod 3.25.76
-- i18n: i18next 23.16.8, react-i18next 15.5.3 or Svelte equivalent
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
 
-**Storage**: Supabase (PostgreSQL) - primary database with future extensibility for other DBMS  
-**Testing**: Vitest 2.1.8+, @testing-library/svelte 4.0.5+, happy-dom 16.14.2+  
-**Target Platform**: Web (fullstack - browser frontend + Node.js backend)  
-**Project Type**: Web monorepo - multiple frontend and backend packages  
-**Performance Goals**: 
-- Development server hot reload <2s
-- Build time <2 minutes for typical changes
-- Authentication flow <3s
-
-**Constraints**: 
-- All documentation MUST be bilingual (English + Russian, identical structure)
-- Package naming MUST follow `-frt`/`-srv` suffix convention
-- All packages MUST have `base/` directory for future implementations
-- No legacy code from React version
-- Issue-first development workflow
-
-**Scale/Scope**: 
-- 20+ feature packages anticipated
-- 4 shared utility packages (@universo/types, utils, api-client, i18n)
-- Multiple hierarchical entity patterns (Clusters, Metaverses, Uniks, etc.)
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [single/web/mobile - determines source structure]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Constitutional Principles Compliance
-
-#### ✅ I. Monorepo Architecture with PNPM
-- Repository will be organized as PNPM monorepo with packages in `packages/` directory
-- Feature packages split into `-frt` and `-srv` for frontend/backend separation
-- All packages will have root-level `base/` directory for future implementations
-- **Status**: COMPLIANT - This is the core feature being implemented
-
-#### ✅ II. Svelte Fullstack with TypeScript
-- All code will use Svelte with TypeScript
-- Strict TypeScript configuration enabled
-- Frontend uses Svelte components, backend uses SvelteKit server capabilities
-- **Status**: COMPLIANT - TypeScript strict mode enforced throughout
-
-#### ✅ III. Database and Authentication Standards
-- Supabase as primary database
-- Passport.js for authentication with Supabase connector
-- Database abstraction layer for future DBMS support
-- **Status**: COMPLIANT - Architecture designed for extensibility
-
-#### ✅ IV. Material UI Implementation
-- Material UI library for Svelte (SMUI) to be evaluated
-- Centralized theme configuration in shared package
-- Alternative libraries documented if SMUI not viable
-- **Status**: COMPLIANT - MUI integration planned with fallback options
-
-#### ✅ V. Bilingual Documentation (NON-NEGOTIABLE)
-- All README files in English (README.md) and Russian (README-RU.md)
-- Identical structure and line count enforced by validation scripts
-- English created first, Russian as exact translation
-- **Status**: COMPLIANT - Validation scripts included in implementation
-
-#### ✅ VI. Issue-First Development Workflow
-- GitHub issue created before implementation (requirement in spec)
-- Labels follow `.github/instructions/github-labels.md`
-- PR follows `.github/instructions/github-pr.md`
-- **Status**: COMPLIANT - Workflow established in this feature
-
-#### ✅ VII. Pattern-Based Incremental Development
-- Base infrastructure implemented first (this feature)
-- Clusters pattern to be implemented next as reference
-- Reusable patterns documented for future features
-- **Status**: COMPLIANT - Foundation-first approach
-
-#### ✅ VIII. Shared Package Architecture and Dependency Management
-- Four shared packages: @universo/types, utils, api-client, i18n
-- PNPM catalog for centralized dependency version management
-- Organization scope prefix `@universo/` for all internal packages
-- **Status**: COMPLIANT - Shared packages are core part of this implementation
-
-### Gate Decision: ✅ PASS
-All constitutional principles are satisfied. No violations require justification. Proceeding to Phase 0 research.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
@@ -113,142 +48,57 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
-# Monorepo structure
-packages/
-├── universo-types/              # Shared TypeScript types and Zod schemas
-│   └── base/
-│       ├── src/
-│       │   ├── common/          # Common types (IDs, pagination)
-│       │   ├── ecs/             # Entity Component System types
-│       │   ├── errors/          # Error types
-│       │   ├── protocol/        # Network protocol types
-│       │   ├── updl/            # UPDL types
-│       │   ├── validation/      # Zod validation schemas
-│       │   └── index.ts
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── tsdown.config.ts
-│       ├── README.md
-│       └── README-RU.md
-│
-├── universo-utils/              # Shared utilities
-│   └── base/
-│       ├── src/
-│       │   ├── api/             # API utilities
-│       │   ├── delta/           # Delta compression
-│       │   ├── env/             # Environment validation
-│       │   ├── math/            # Math utilities
-│       │   ├── net/             # Network utilities
-│       │   ├── rate-limiting/   # Rate limiting
-│       │   ├── serialization/   # Serialization
-│       │   ├── ui-utils/        # UI helpers
-│       │   ├── validation/      # Validation helpers
-│       │   ├── index.ts         # Server exports
-│       │   └── index.browser.ts # Browser exports
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── tsdown.config.ts
-│       ├── README.md
-│       └── README-RU.md
-│
-├── universo-api-client/         # Type-safe API client
-│   └── base/
-│       ├── src/
-│       │   ├── clients/         # API client classes
-│       │   ├── hooks/           # Data fetching hooks
-│       │   ├── types/           # Request/response types
-│       │   └── index.ts
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── tsdown.config.ts
-│       ├── README.md
-│       └── README-RU.md
-│
-├── universo-i18n/               # Centralized i18n instance
-│   └── base/
-│       ├── src/
-│       │   ├── instance.ts      # i18next singleton
-│       │   ├── registry.ts      # Namespace registry
-│       │   ├── types.ts         # i18n types
-│       │   └── index.ts
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── tsdown.config.ts
-│       ├── README.md
-│       └── README-RU.md
-│
-├── core-config/                 # Centralized configuration
-│   └── base/
-│       ├── src/
-│       │   ├── database.config.ts
-│       │   ├── auth.config.ts
-│       │   ├── theme.config.ts
-│       │   ├── env.config.ts
-│       │   └── index.ts
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── README.md
-│       └── README-RU.md
-│
-├── auth-srv/                    # Authentication service (backend)
-│   └── base/
-│       ├── src/
-│       │   ├── strategies/
-│       │   │   └── supabase.strategy.ts
-│       │   ├── middleware/
-│       │   │   ├── authenticate.ts
-│       │   │   └── authorize.ts
-│       │   ├── services/
-│       │   │   ├── session.service.ts
-│       │   │   └── token.service.ts
-│       │   └── index.ts
-│       ├── package.json
-│       ├── tsconfig.json
-│       ├── README.md
-│       └── README-RU.md
-│
-└── ui-theme/                    # UI theme configuration (frontend)
-    └── base/
-        ├── src/
-        │   ├── theme.config.ts
-        │   ├── components/      # Theme-aware components
-        │   └── index.ts
-        ├── package.json
-        ├── tsconfig.json
-        ├── README.md
-        └── README-RU.md
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
 
-# Root configuration files
-pnpm-workspace.yaml              # Workspace config + dependency catalog
-package.json                     # Root package with workspace scripts
-tsconfig.base.json              # Shared TypeScript configuration
-.gitignore                       # Git ignore rules
-README.md                        # English documentation
-README-RU.md                     # Russian documentation
-.eslintrc.js                     # ESLint configuration
-.prettierrc                      # Prettier configuration
-.editorconfig                    # Editor settings
-turbo.json                       # Optional: Turborepo configuration
+tests/
+├── contract/
+├── integration/
+└── unit/
 
-# Validation scripts
-scripts/
-├── validate-bilingual-docs.sh   # Line count validation
-├── validate-package-structure.sh # Structure compliance
-└── validate-workspace-deps.sh   # Dependency audit
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
+└── tests/
 
-# Documentation
-.github/
-└── instructions/
-    ├── github-issues.md
-    ├── github-labels.md
-    ├── github-pr.md
-    └── i18n-docs.md
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: Web monorepo structure selected (not single project or mobile). The project requires both frontend and backend packages with clear separation, shared utility packages for code reuse, and centralized configuration. This structure supports the anticipated 20+ feature packages while maintaining consistency through shared packages and build tooling.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
-No constitutional violations. This section is not needed.
+> **Fill ONLY if Constitution Check has violations that must be justified**
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
