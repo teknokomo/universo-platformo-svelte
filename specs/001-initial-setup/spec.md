@@ -142,6 +142,8 @@ A developer builds user interfaces using the Material UI component library integ
 - **FR-009**: Frontend packages MUST be structured for Svelte with TypeScript
 - **FR-010**: Backend packages MUST be structured for Node.js with TypeScript
 - **FR-011**: Each package MUST have its own `package.json` with proper dependencies and workspace references
+- **FR-011a**: Shared utility packages MUST be created to avoid code duplication across feature packages (e.g., `universo-types`, `universo-utils`, `universo-api-client`, `universo-i18n`)
+- **FR-011b**: Package naming MUST use organization scope `@universo/` prefix for all internal packages
 
 #### Development Environment
 - **FR-012**: Project MUST use TypeScript for both frontend and backend code
@@ -149,6 +151,9 @@ A developer builds user interfaces using the Material UI component library integ
 - **FR-014**: Project MUST include proper TypeScript configuration files (`tsconfig.json`)
 - **FR-015**: Development environment MUST support hot module replacement for efficient development
 - **FR-016**: Project MUST include build scripts that work across all packages
+- **FR-016a**: Project MUST use PNPM catalog feature for centralized dependency version management to ensure version consistency across all packages
+- **FR-016b**: Project SHOULD consider Turborepo or similar build orchestration tool for optimized monorepo build caching and parallelization
+- **FR-016c**: Build tooling MUST use modern bundlers (e.g., tsdown, Vite) that support both ESM and CJS output formats for maximum compatibility
 
 #### Database Integration
 - **FR-017**: System MUST integrate with Supabase as the primary database solution
@@ -184,10 +189,12 @@ A developer builds user interfaces using the Material UI component library integ
 ### Key Entities
 
 - **Package**: A self-contained module in the monorepo; has dependencies, scripts, and source code; can be frontend (`-frt` suffix) or backend (`-srv` suffix); contains a `base/` directory for implementation variants
+- **Shared Package**: Utility package without feature-specific UI or backend logic; provides common types, utilities, API clients, or internationalization; consumed by multiple feature packages; examples: `@universo/types`, `@universo/utils`, `@universo/api-client`, `@universo/i18n`
 - **Workspace**: PNPM workspace configuration that links packages together; enables packages to reference each other using workspace protocol; manages dependencies across the monorepo
 - **User**: Individual accessing the system; requires authentication; has session state; credentials stored in Supabase
 - **Authentication Session**: Managed by Passport.js; linked to Supabase user; persists across requests; provides user context to application
 - **Configuration**: Environment-specific settings; includes Supabase credentials; includes authentication settings; shared across packages where appropriate
+- **Dependency Catalog**: Centralized version manifest in pnpm-workspace.yaml that defines canonical versions for shared dependencies; ensures version consistency; simplifies dependency updates across monorepo
 
 ## Technical Standards and Patterns *(mandatory)*
 
@@ -428,6 +435,475 @@ export const theme = {
   },
   spacing: 8
 };
+```
+
+### Clusters Pattern Specification
+
+**Base Pattern Structure**:
+The Clusters pattern establishes a three-level hierarchical entity structure that serves as the foundation for similar features throughout the application.
+
+**Entity Hierarchy**:
+```
+Cluster (Top Level)
+├── Domain (Middle Level)
+│   ├── Resource (Bottom Level)
+│   ├── Resource
+│   └── Resource
+├── Domain
+│   └── Resource
+```
+
+**Pattern Application Examples**:
+- **Clusters Feature**: Clusters → Domains → Resources
+- **Metaverses Feature**: Metaverses → Sections → Entities
+- **Uniks Feature**: Uniks → Categories → Items (+ additional levels)
+
+**Entity Relationships**:
+- One Cluster contains many Domains (1:N)
+- One Domain contains many Resources (1:N)
+- Resources are the leaf nodes with no children
+- Each level MUST support CRUD operations
+- Each level MUST support hierarchical navigation
+
+**Database Schema Pattern**:
+```sql
+-- Top level entity
+CREATE TABLE clusters (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Middle level entity
+CREATE TABLE domains (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  cluster_id UUID REFERENCES clusters(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Bottom level entity
+CREATE TABLE resources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  domain_id UUID REFERENCES domains(id) ON DELETE CASCADE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  resource_type VARCHAR(100),
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**UI Component Pattern**:
+- List view for each level showing child entities
+- Detail view for individual entity CRUD operations
+- Breadcrumb navigation showing hierarchy path
+- Tree view for visualizing entire hierarchy
+
+**Implementation Priority**:
+1. Implement Clusters pattern as the reference implementation
+2. Document patterns and reusable components
+3. Apply pattern to Metaverses with minor variations
+4. Extend pattern to Uniks with additional levels
+
+### Shared Package Architecture Pattern
+
+**Purpose**: Shared packages eliminate code duplication, provide consistent types and utilities, and create reusable building blocks for feature packages.
+
+**Required Shared Packages**:
+
+#### `@universo/types`
+**Purpose**: Centralized TypeScript type definitions used across frontend and backend
+
+**Structure**:
+```
+packages/universo-types/
+└── base/
+    ├── src/
+    │   ├── common/          # Common types (IDs, timestamps, pagination)
+    │   ├── ecs/             # Entity Component System types
+    │   ├── errors/          # Error types and codes
+    │   ├── protocol/        # Network protocol types
+    │   ├── updl/            # Universal Platform Description Language types
+    │   ├── validation/      # Validation schemas (Zod)
+    │   └── index.ts         # Unified exports
+    ├── package.json
+    └── tsconfig.json
+```
+
+**Requirements**:
+- MUST be a pure TypeScript package with no runtime dependencies
+- MUST export both types and Zod validation schemas
+- MUST be consumed by both frontend and backend packages
+- SHOULD use conditional exports for different module systems
+
+**Example package.json**:
+```json
+{
+  "name": "@universo/types",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "import": "./dist/validation/index.mjs"
+    }
+  },
+  "dependencies": {
+    "zod": "3.25.76"
+  }
+}
+```
+
+#### `@universo/utils`
+**Purpose**: Shared utility functions for validation, serialization, network operations, rate limiting, and UI helpers
+
+**Structure**:
+```
+packages/universo-utils/
+└── base/
+    ├── src/
+    │   ├── api/             # API utilities (request builders, error handlers)
+    │   ├── delta/           # Delta compression for network efficiency
+    │   ├── env/             # Environment variable validation
+    │   ├── math/            # Mathematical utilities
+    │   ├── net/             # Network utilities
+    │   ├── rate-limiting/   # Rate limiting middleware
+    │   ├── serialization/   # Data serialization (binary protocols)
+    │   ├── ui-utils/        # UI utilities (formatters, validators)
+    │   ├── validation/      # Validation helpers
+    │   ├── index.ts         # Server-side exports
+    │   └── index.browser.ts # Browser-side exports
+    ├── package.json
+    └── tsconfig.json
+```
+
+**Requirements**:
+- MUST provide separate exports for server and browser environments
+- MUST use conditional exports to prevent server-only code from bundling in frontend
+- MAY have optional peer dependencies (e.g., express for rate-limiting middleware)
+- MUST depend on `@universo/types` for shared type definitions
+
+**Example package.json with conditional exports**:
+```json
+{
+  "name": "@universo/utils",
+  "exports": {
+    ".": {
+      "browser": {
+        "import": "./dist/index.browser.mjs",
+        "require": "./dist/index.browser.js",
+        "types": "./dist/index.browser.d.ts"
+      },
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./rate-limiting": {
+      "import": "./dist/rate-limiting.mjs",
+      "require": "./dist/rate-limiting.js",
+      "types": "./dist/rate-limiting.d.ts"
+    },
+    "./ui-utils": {
+      "import": "./dist/ui-utils.mjs",
+      "require": "./dist/ui-utils.js"
+    }
+  },
+  "dependencies": {
+    "@universo/types": "workspace:*",
+    "@universo/i18n": "workspace:*",
+    "zod": "catalog:"
+  },
+  "peerDependencies": {
+    "express": "^4.18.0"
+  },
+  "peerDependenciesMeta": {
+    "express": {
+      "optional": true
+    }
+  }
+}
+```
+
+#### `@universo/api-client`
+**Purpose**: Type-safe API client for communicating with backend services
+
+**Structure**:
+```
+packages/universo-api-client/
+├── src/
+│   ├── clients/          # API client classes (ClustersClient, AuthClient, etc.)
+│   ├── hooks/            # React Query hooks for data fetching
+│   ├── types/            # Request/response types
+│   └── index.ts          # Main exports
+├── package.json
+└── tsconfig.json
+```
+
+**Requirements**:
+- MUST provide type-safe API methods matching backend endpoints
+- SHOULD integrate with React Query or SvelteKit for data fetching patterns
+- MUST handle authentication headers automatically
+- MUST provide retry logic and error handling
+- MUST depend on `@universo/types` for API contracts
+- MAY use axios or fetch as HTTP client
+
+**Example API client**:
+```typescript
+import { z } from 'zod';
+import { ClusterSchema } from '@universo/types';
+
+export class ClustersClient {
+  async getClusters(params: PaginationParams): Promise<Cluster[]> {
+    const response = await this.http.get('/api/clusters', { params });
+    return ClusterSchema.array().parse(response.data);
+  }
+}
+```
+
+#### `@universo/i18n`
+**Purpose**: Centralized internationalization instance and translation management
+
+**Structure**:
+```
+packages/universo-i18n/
+└── base/
+    ├── src/
+    │   ├── instance.ts      # i18next instance singleton
+    │   ├── registry.ts      # Translation namespace registry
+    │   ├── types.ts         # i18n TypeScript types
+    │   └── index.ts         # Main exports
+    ├── package.json
+    └── tsconfig.json
+```
+
+**Requirements**:
+- MUST provide singleton i18next instance to avoid multiple instance conflicts
+- MUST export namespace registry for dynamic translation loading
+- MUST support lazy loading of translation namespaces
+- MUST integrate with react-i18next or equivalent Svelte i18n library
+- SHOULD provide type-safe translation keys (TypeScript namespaces)
+
+**Example usage**:
+```typescript
+import { i18nInstance, registerNamespace } from '@universo/i18n';
+import clustersEn from './locales/en/clusters.json';
+import clustersRu from './locales/ru/clusters.json';
+
+registerNamespace('clusters', {
+  en: clustersEn,
+  ru: clustersRu
+});
+
+// Type-safe translations
+const { t } = useTranslation('clusters');
+t('cluster.create.title'); // Autocomplete and type-checked
+```
+
+### PNPM Catalog Pattern
+
+**Purpose**: Centralize dependency versions in `pnpm-workspace.yaml` to ensure consistency across all packages and simplify version updates.
+
+**Catalog Definition** (in `pnpm-workspace.yaml`):
+```yaml
+packages:
+  - 'packages/*'
+  - 'packages/*/base'
+
+catalog:
+  # TypeScript toolchain
+  typescript: ^5.8.3
+  
+  # i18next ecosystem
+  i18next: 23.16.8
+  react-i18next: ^15.5.3
+  
+  # Svelte ecosystem (adapt for Svelte version)
+  svelte: ^4.2.0  
+  '@sveltejs/kit': ^2.0.0
+  
+  # Build tools
+  vite: ^5.4.19
+  vitest: ^2.1.8
+  
+  # MUI/UI (find Svelte equivalents)
+  # Note: React MUI won't work with Svelte; need alternatives
+  
+  # Testing
+  '@testing-library/svelte': ^4.0.5
+  happy-dom: ^16.14.2
+  
+  # Utilities
+  dayjs: ^1.11.18
+  axios: ^1.7.9
+  zod: ^3.25.76
+  
+  # Rate limiting
+  express-rate-limit: ^8.2.0
+  ioredis: ^5.8.2
+```
+
+**Usage in package.json**:
+```json
+{
+  "dependencies": {
+    "typescript": "catalog:",
+    "i18next": "catalog:",
+    "dayjs": "catalog:"
+  }
+}
+```
+
+**Benefits**:
+- Single source of truth for dependency versions
+- Automatic version consistency across monorepo
+- Simplified dependency updates (change once, apply everywhere)
+- Prevents accidental version drift between packages
+
+### Advanced Build Configuration Pattern
+
+**Build Tool Selection**: Use `tsdown` for TypeScript library builds or Vite for full applications
+
+**Tsdown Configuration Pattern** (for library packages):
+```typescript
+// tsdown.config.ts
+import { defineConfig } from 'tsdown';
+
+export default defineConfig({
+  entry: {
+    index: './src/index.ts',
+  },
+  
+  // Output both ESM and CJS for compatibility
+  format: ['esm', 'cjs'],
+  
+  // Generate TypeScript declarations
+  dts: true,
+  
+  // Platform: 'node' for backend, 'browser' for frontend
+  platform: 'node',
+  
+  clean: true,
+  outDir: 'dist',
+  
+  // CRITICAL: Don't auto-modify package.json exports
+  exports: false,
+  
+  // Tree-shaking for optimization
+  treeshake: true,
+  
+  // Don't minify libraries for better debugging
+  minify: false,
+  
+  // Source maps for debugging
+  sourcemap: true,
+  
+  // External dependencies (don't bundle)
+  external: [
+    '@universo/*',  // All workspace packages
+    'svelte',
+    'react',
+    // ... other peer dependencies
+  ],
+});
+```
+
+**Frontend Package tsconfig.json Pattern**:
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@types/*": ["../../../packages/universo-types/base/src/*"],
+      "@utils/*": ["../../../packages/universo-utils/base/src/*"],
+      "@api/*": ["src/api/*"],
+      "@components/*": ["src/components/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}
+```
+
+**Backend Package tsconfig.json Pattern**:
+```json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "Node16",
+    "lib": ["ES2020"],
+    "moduleResolution": "node16",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "declaration": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
+```
+
+**Turborepo Configuration** (optional but recommended):
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**"],
+      "cache": false
+    },
+    "test": {},
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
+```
+
+**Root package.json Scripts with Turbo**:
+```json
+{
+  "scripts": {
+    "build": "turbo run build",
+    "build-force": "pnpm clean && turbo run build --force",
+    "dev": "turbo run dev --parallel --no-cache",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "clean:all": "rimraf node_modules .turbo **/node_modules **/.turbo **/dist **/build"
+  }
+}
 ```
 
 ### Clusters Pattern Specification
@@ -793,6 +1269,8 @@ describe('Authentication Flow', () => {
 - **SC-004**: New packages can be created following the structure template in under 10 minutes
 - **SC-005**: Package dependencies resolve correctly 100% of the time when properly configured
 - **SC-006**: Build process successfully compiles all packages without errors
+- **SC-006a**: Shared packages (@universo/types, @universo/utils, @universo/api-client, @universo/i18n) are successfully consumed by feature packages without import errors
+- **SC-006b**: Catalog dependencies maintain version consistency across all packages (verified by automated checks)
 
 #### Documentation Quality
 - **SC-007**: All README files pass bilingual structure validation (identical line count in English and Russian)
@@ -914,17 +1392,20 @@ Coding standards and patterns that ensure consistency, maintainability, and qual
 
 The following items are explicitly excluded from this initial setup:
 
-- Implementation of specific business features (Clusters, Domains, Resources, etc.)
-- Creation of complete UI components and pages
-- Database schema design and migrations
-- Deployment configuration and CI/CD pipelines
+- Implementation of specific business features beyond base infrastructure (Clusters, Domains, Resources, etc. will be in subsequent features)
+- Creation of complete UI components and pages for business features
+- Database schema design and migrations for business entities
+- Deployment configuration and CI/CD pipelines (basic setup only, not production deployment)
 - Comprehensive test suites (will be added with features)
-- Internationalization (i18n) for application UI (only documentation is bilingual)
+- Internationalization (i18n) for application UI content (only documentation is bilingual; i18n infrastructure setup is in scope)
 - Performance optimization and load testing
 - Security audits and penetration testing
 - Mobile application setup
-- Legacy code migration from React version
+- Legacy code migration from React version (only pattern extraction)
 - Documentation repository setup (external)
-- Complete feature parity with React version
+- Complete feature parity with React version (iterative implementation)
+- Advanced features like LangChain integration, UPDL nodes, multiplayer (Colyseus), and complex publish mechanisms
+
+**Note**: While shared package architecture (@universo/types, @universo/utils, @universo/api-client, @universo/i18n) is now explicitly in scope as part of base functionality, the actual feature implementations using these packages are out of scope for initial setup.
 
 These items will be addressed in subsequent features and specifications.
