@@ -136,7 +136,8 @@ A developer builds user interfaces using the Material UI component library integ
 - **FR-005**: Repository MUST include issue labels following the guidelines in `.github/instructions/github-labels.md`
 
 #### Package Structure
-- **FR-006**: All functionality packages MUST reside in the `packages/` directory
+- **FR-006**: ALL functionality MUST be implemented as packages residing in the `packages/` directory. NO feature code, business logic, UI components, or API routes may exist outside packages/. The ONLY exceptions are root-level build configuration files, package manager files (package.json, pnpm-workspace.yaml, pnpm-lock.yaml), and application entry points
+- **FR-006a**: Packages MUST be designed as independent, extractable modules that can eventually be moved to separate repositories without significant refactoring
 - **FR-007**: Packages requiring both frontend and backend MUST be split into separate packages with `-frt` (frontend) and `-srv` (backend) suffixes
 - **FR-008**: Each package MUST contain a root `base/` directory to support future multiple implementations
 - **FR-009**: Frontend packages MUST be structured for Svelte with TypeScript
@@ -181,6 +182,7 @@ A developer builds user interfaces using the Material UI component library integ
 - **FR-031**: Project structure MUST NOT include legacy code or incomplete implementations from reference project
 - **FR-032**: Project MUST NOT include separate `docs/` directory (documentation will be external)
 - **FR-033**: Project MUST NOT include pre-created AI agent rules (user will create as needed)
+- **FR-033a**: Feature implementations MUST NOT be placed in root-level directories like `src/`, `lib/`, or `app/`. All features MUST be implemented as packages in `packages/` directory
 
 #### Development Process
 - **FR-034**: Development team MUST conduct step-by-step analysis of Universo Platformo React repository (https://github.com/teknokomo/universo-platformo-react) structure before implementing each major feature component to understand architectural patterns and requirements
@@ -188,9 +190,9 @@ A developer builds user interfaces using the Material UI component library integ
 
 ### Key Entities
 
-- **Package**: A self-contained module in the monorepo; has dependencies, scripts, and source code; can be frontend (`-frt` suffix) or backend (`-srv` suffix); contains a `base/` directory for implementation variants
-- **Shared Package**: Utility package without feature-specific UI or backend logic; provides common types, utilities, API clients, or internationalization; consumed by multiple feature packages; examples: `@universo/types`, `@universo/utils`, `@universo/api-client`, `@universo/i18n`
-- **Workspace**: PNPM workspace configuration that links packages together; enables packages to reference each other using workspace protocol; manages dependencies across the monorepo
+- **Package**: A self-contained module in the monorepo; has dependencies, scripts, and source code; can be frontend (`-frt` suffix) or backend (`-srv` suffix); contains a `base/` directory for implementation variants; designed to eventually become a standalone repository
+- **Shared Package**: Utility package without feature-specific UI or backend logic; provides common types, utilities, API clients, or internationalization; consumed by multiple feature packages; examples: `@universo/types`, `@universo/utils`, `@universo/api-client`, `@universo/i18n`; designed to be published as independent npm packages
+- **Workspace**: PNPM workspace configuration that links packages together; enables packages to reference each other using workspace protocol; manages dependencies across the monorepo; temporary organizational structure before packages become independent repositories
 - **User**: Individual accessing the system; requires authentication; has session state; credentials stored in Supabase
 - **Authentication Session**: Managed by Passport.js; linked to Supabase user; persists across requests; provides user context to application
 - **Configuration**: Environment-specific settings; includes Supabase credentials; includes authentication settings; shared across packages where appropriate
