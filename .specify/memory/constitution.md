@@ -1,6 +1,14 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version Change: 1.1.0 → 1.2.0
+Rationale: MINOR version - Enhanced Principle I to explicitly prohibit non-package functionality and document future repository extraction strategy
+
+Modified Principles:
+  - Enhanced Principle I: Added explicit prohibition of functionality outside packages/, clarified exceptions, added future extraction strategy
+
+Previous Changes:
+==================
 Version Change: 1.0.0 → 1.1.0
 Rationale: MINOR version - Added new principle VIII (Shared Package Architecture) and expanded Technology Stack
 
@@ -38,11 +46,13 @@ Added Sections: Core Principles (7 principles), Technology Stack Requirements, D
 
 ## Core Principles
 
-### I. Monorepo Architecture with PNPM
+### I. Monorepo Architecture with PNPM (NON-NEGOTIABLE)
 
-The project MUST be organized as a monorepo managed by PNPM workspace. All packages reside in the `packages/` directory. Each package requiring both frontend and backend functionality MUST be separated into distinct packages with suffixes: `-frt` for frontend and `-srv` for backend (e.g., `packages/clusters-frt` and `packages/clusters-srv`). Every package MUST contain a root-level `base/` directory to accommodate future alternative implementations of the same functionality.
+The project MUST be organized as a monorepo managed by PNPM workspace. ALL functionality MUST be implemented as packages residing in the `packages/` directory. The ONLY exceptions are root-level build configuration, package manager files (package.json, pnpm-workspace.yaml, pnpm-lock.yaml), and application entry points. NO feature implementation, business logic, UI components, or API routes may exist outside the `packages/` directory structure. Each package requiring both frontend and backend functionality MUST be separated into distinct packages with suffixes: `-frt` for frontend and `-srv` for backend (e.g., `packages/clusters-frt` and `packages/clusters-srv`). Every package MUST contain a root-level `base/` directory to accommodate future alternative implementations of the same functionality.
 
-**Rationale**: This structure enables independent deployment, clear separation of concerns, and allows multiple technology stack implementations while maintaining consistent package organization.
+Packages are designed as independent, extractable modules. Each package MUST be structured to eventually move to a separate repository without requiring significant refactoring. This workspace-based monorepo structure is a temporary organizational approach; the long-term architecture anticipates individual packages becoming standalone repositories.
+
+**Rationale**: This structure enables independent deployment, clear separation of concerns, and allows multiple technology stack implementations while maintaining consistent package organization. By prohibiting functionality outside packages/, the project ensures all features remain modular and extractable. This design supports the project's evolution from a monorepo to a distributed ecosystem of independent package repositories.
 
 ### II. Svelte Fullstack with TypeScript
 
@@ -153,4 +163,4 @@ This constitution supersedes all other practices and conventions within the Univ
 ### Version Control
 This constitution uses semantic versioning. All changes MUST be tracked with clear rationale. Amendment history MUST be preserved in git history and Sync Impact Reports.
 
-**Version**: 1.1.0 | **Ratified**: 2025-11-15 | **Last Amended**: 2025-11-17
+**Version**: 1.2.0 | **Ratified**: 2025-11-15 | **Last Amended**: 2025-11-17
