@@ -1,7 +1,7 @@
 # Implementation Plan: Initial Setup and Architecture of Universo Platformo Svelte
 
 **Branch**: `001-initial-setup` | **Date**: 2025-11-17 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/001-initial-setup/spec.md`
+**Input**: Feature specification from `/.specify/specs/001-initial-setup/spec.md`
 
 ## Summary
 
@@ -39,7 +39,7 @@ Establish the foundational monorepo architecture for Universo Platformo Svelte w
 ### Documentation (this feature)
 
 ```text
-specs/001-initial-setup/
+.specify/specs/001-initial-setup/
 ├── plan.md              # This file
 ├── research.md          # Completed - Technical decisions documented
 ├── data-model.md        # Completed - Core entities defined
