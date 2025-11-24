@@ -1,6 +1,6 @@
 # Tasks: Initial Setup and Architecture of Universo Platformo Svelte
 
-**Input**: Design documents from `/specs/001-initial-setup/`
+**Input**: Design documents from `/.specify/specs/001-initial-setup/`
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/
 
 **Tests**: Tests are NOT explicitly requested in the feature specification. This is infrastructure setup focused on project architecture and developer experience. Testing tasks are omitted as per requirements.
