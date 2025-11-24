@@ -1,6 +1,6 @@
 # Tasks: Initial Setup and Architecture of Universo Platformo Svelte
 
-**Input**: Design documents from `/specs/001-initial-setup/`
+**Input**: Design documents from `/.specify/specs/001-initial-setup/`
 **Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, contracts/
 
 **Tests**: Tests are NOT explicitly requested in the feature specification. This is infrastructure setup focused on project architecture and developer experience. Testing tasks are omitted as per requirements.
@@ -152,7 +152,7 @@ This is a **monorepo project** where ALL functionality resides in `packages/` di
 - [ ] T084 [US1] Test validation scripts: run pnpm validate, verify package structure and documentation validation passes
 - [ ] T085 [US1] Create .github/workflows/ci.yml for CI validation of build, test, lint, and validation scripts
 - [ ] T086 [US1] Verify quickstart.md instructions are accurate by following them step-by-step
-- [ ] T087 [US1] Update root README.md with quick start section referencing specs/001-initial-setup/quickstart.md
+- [ ] T087 [US1] Update root README.md with quick start section referencing .specify/specs/001-initial-setup/quickstart.md
 - [ ] T088 [US1] Update root README-RU.md to match English version structure (line-by-line translation)
 - [ ] T089 [US1] Run complete validation: pnpm install && pnpm build && pnpm validate && pnpm lint
 
@@ -313,7 +313,7 @@ This is a **monorepo project** where ALL functionality resides in `packages/` di
 - [ ] T170 [P] Add security policy: create SECURITY.md with vulnerability reporting process
 - [ ] T171 [P] Create LICENSE file with appropriate open source license
 - [ ] T172 Final comprehensive test: clean install, build, validate, and dev server startup
-- [ ] T173 Update specs/001-initial-setup/spec.md with completion status
+- [ ] T173 Update .specify/specs/001-initial-setup/spec.md with completion status
 - [ ] T174 Create GitHub Issues for any identified improvements or future enhancements
 - [ ] T175 Tag release v0.1.0 with completion of initial setup
 
