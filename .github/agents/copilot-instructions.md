@@ -31,7 +31,7 @@ packages/
 └── [feature]-srv/               # Feature backend packages
     └── base/
         └── src/
-specs/                           # Feature specifications
+.specify/specs/                  # Feature specifications (Spec Kit standard)
 scripts/                         # Validation scripts
 ```
 
