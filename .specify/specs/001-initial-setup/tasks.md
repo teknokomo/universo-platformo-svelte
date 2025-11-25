@@ -131,6 +131,25 @@ This is a **monorepo project** where ALL functionality resides in `packages/` di
 - [ ] T078 Create packages/core-config/README.md with package overview
 - [ ] T079 Build and validate @universo/core-config package
 
+### @universo/app-frt Package (SvelteKit Application Shell)
+
+**Note**: This package provides the main application entry point and development server. It ties all shared packages together and enables `pnpm dev` to start a working application.
+
+- [ ] T079a [P] Create packages/app-frt/base/package.json with SvelteKit and shared package dependencies
+- [ ] T079b [P] Create packages/app-frt/base/tsconfig.json extending base config for SvelteKit
+- [ ] T079c [P] Create packages/app-frt/base/svelte.config.js with SvelteKit configuration
+- [ ] T079d [P] Create packages/app-frt/base/vite.config.ts with Vite configuration for development
+- [ ] T079e [P] Create packages/app-frt/base/src/app.html with HTML template
+- [ ] T079f [P] Create packages/app-frt/base/src/app.d.ts with SvelteKit type declarations
+- [ ] T079g Create packages/app-frt/base/src/routes/+layout.svelte with root layout (imports ui-theme)
+- [ ] T079h Create packages/app-frt/base/src/routes/+page.svelte with home page placeholder
+- [ ] T079i Create packages/app-frt/base/src/routes/+error.svelte with error page
+- [ ] T079j Create packages/app-frt/base/README.md with application documentation
+- [ ] T079k Create packages/app-frt/base/README-RU.md with Russian translation
+- [ ] T079l Create packages/app-frt/README.md with package overview
+- [ ] T079m Build and validate @universo/app-frt package
+- [ ] T079n Test development server: run pnpm dev and verify application starts on localhost
+
 **Checkpoint**: Foundation ready - shared packages complete and validated. User story implementation can now begin.
 
 ---
@@ -352,8 +371,9 @@ This is a **monorepo project** where ALL functionality resides in `packages/` di
 
 **Phase 2 (Foundational)**:
 - Each package's internal tasks can run in parallel (marked [P])
-- Package builds must be sequential: types → utils → i18n → api-client → core-config
-- Reason: Dependencies between shared packages (utils depends on types, etc.)
+- Package builds must be sequential: types → utils → i18n → api-client → core-config → app-frt
+- Reason: Dependencies between shared packages (utils depends on types, app-frt depends on ui-theme)
+- app-frt package MUST be last as it imports all other shared packages
 
 **Within Each User Story**:
 - Package creation tasks within a story can run in parallel (marked [P])
@@ -494,10 +514,11 @@ Tasks T137-T155: "@universo/ui-theme package and SMUI integration"
 - [ ] Git repository is clean (no uncommitted files)
 
 ### Phase 2 Success Criteria
-- [ ] All 5 shared packages build successfully
+- [ ] All 6 shared packages build successfully (types, utils, i18n, api-client, core-config, app-frt)
 - [ ] TypeScript types are properly exported
 - [ ] Packages can import each other using workspace protocol
 - [ ] All shared packages have bilingual README with matching line counts
+- [ ] app-frt development server starts on localhost
 
 ### Phase 3 (US1) Success Criteria
 - [ ] Fresh clone → pnpm install → pnpm build succeeds in under 5 minutes
@@ -554,18 +575,20 @@ Tasks T137-T155: "@universo/ui-theme package and SMUI integration"
 
 ## Task Statistics
 
-- **Total Tasks**: 175
-- **Setup Phase**: 14 tasks (~8% of total)
-- **Foundational Phase**: 65 tasks (~37% of total) - CRITICAL PATH
-- **User Story 1 (P1)**: 10 tasks (~6% of total) - MVP TARGET
-- **User Story 2 (P2)**: 14 tasks (~8% of total)
+- **Total Tasks**: 189 (including 14 new app-frt tasks)
+- **Setup Phase**: 14 tasks (~7% of total)
+- **Foundational Phase**: 79 tasks (~42% of total) - CRITICAL PATH (includes app-frt)
+- **User Story 1 (P1)**: 10 tasks (~5% of total) - MVP TARGET
+- **User Story 2 (P2)**: 14 tasks (~7% of total)
 - **User Story 3 (P3)**: 20 tasks (~11% of total)
 - **User Story 4 (P4)**: 13 tasks (~7% of total)
-- **User Story 5 (P5)**: 19 tasks (~11% of total)
+- **User Story 5 (P5)**: 19 tasks (~10% of total)
 - **Polish Phase**: 20 tasks (~11% of total)
 
-**Parallelizable Tasks**: 92 tasks marked [P] (~53% of total)
+**Parallelizable Tasks**: 98 tasks marked [P] (~52% of total)
 - Can significantly reduce implementation time with parallel execution
 
-**Critical Path**: Setup → Foundational → US1 (89 tasks minimum for MVP)
-**Recommended MVP Scope**: Phases 1-3 only (89 tasks, ~12-16 hours single developer)
+**Critical Path**: Setup → Foundational (with app-frt) → US1 (103 tasks minimum for MVP)
+**Recommended MVP Scope**: Phases 1-3 only (103 tasks, ~14-18 hours single developer)
+
+**Note**: The app-frt package is critical for providing a runnable development server. Without it, `pnpm dev` would not have an application entry point.

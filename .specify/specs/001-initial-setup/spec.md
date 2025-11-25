@@ -641,18 +641,19 @@ packages/universo-utils/
 **Structure**:
 ```
 packages/universo-api-client/
-├── src/
-│   ├── clients/          # API client classes (ClustersClient, AuthClient, etc.)
-│   ├── hooks/            # React Query hooks for data fetching
-│   ├── types/            # Request/response types
-│   └── index.ts          # Main exports
-├── package.json
-└── tsconfig.json
+└── base/
+    ├── src/
+    │   ├── clients/          # API client classes (ClustersClient, AuthClient, etc.)
+    │   ├── stores/           # Svelte stores for reactive data fetching
+    │   ├── types/            # Request/response types
+    │   └── index.ts          # Main exports
+    ├── package.json
+    └── tsconfig.json
 ```
 
 **Requirements**:
 - MUST provide type-safe API methods matching backend endpoints
-- SHOULD integrate with React Query or SvelteKit for data fetching patterns
+- SHOULD integrate with SvelteKit load functions and Svelte stores for data fetching patterns
 - MUST handle authentication headers automatically
 - MUST provide retry logic and error handling
 - MUST depend on `@universo/types` for API contracts
@@ -907,80 +908,6 @@ export default defineConfig({
   }
 }
 ```
-
-### Clusters Pattern Specification
-
-**Base Pattern Structure**:
-The Clusters pattern establishes a three-level hierarchical entity structure that serves as the foundation for similar features throughout the application.
-
-**Entity Hierarchy**:
-```
-Cluster (Top Level)
-├── Domain (Middle Level)
-│   ├── Resource (Bottom Level)
-│   ├── Resource
-│   └── Resource
-├── Domain
-│   └── Resource
-```
-
-**Pattern Application Examples**:
-- **Clusters Feature**: Clusters → Domains → Resources
-- **Metaverses Feature**: Metaverses → Sections → Entities
-- **Uniks Feature**: Uniks → Categories → Items (+ additional levels)
-
-**Entity Relationships**:
-- One Cluster contains many Domains (1:N)
-- One Domain contains many Resources (1:N)
-- Resources are the leaf nodes with no children
-- Each level MUST support CRUD operations
-- Each level MUST support hierarchical navigation
-
-**Database Schema Pattern**:
-```sql
--- Top level entity
-CREATE TABLE clusters (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Middle level entity
-CREATE TABLE domains (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  cluster_id UUID REFERENCES clusters(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-
--- Bottom level entity
-CREATE TABLE resources (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  domain_id UUID REFERENCES domains(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  resource_type VARCHAR(100),
-  metadata JSONB,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-**UI Component Pattern**:
-- List view for each level showing child entities
-- Detail view for individual entity CRUD operations
-- Breadcrumb navigation showing hierarchy path
-- Tree view for visualizing entire hierarchy
-
-**Implementation Priority**:
-1. Implement Clusters pattern as the reference implementation
-2. Document patterns and reusable components
-3. Apply pattern to Metaverses with minor variations
-4. Extend pattern to Uniks with additional levels
 
 ### Step-by-Step React Repository Analysis Process
 
