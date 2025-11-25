@@ -47,7 +47,7 @@ This analysis evaluated the consistency, completeness, and alignment of `spec.md
 | FR-006a Extractable modules | ✅ | - | Design principle |
 | FR-007 Frontend/backend split | ⚠️ | T104-T116 only | Only auth-srv, no auth-frt |
 | FR-008 base/ directory | ✅ | All package tasks | Consistent |
-| FR-009-010 Svelte/Node.js structure | ⚠️ | Partial | No app shell task |
+| FR-009-010 Svelte/Node.js structure | ✅ | T079a-T079n | app-frt provides SvelteKit shell |
 | FR-011 Package package.json | ✅ | Multiple | Per-package tasks |
 | FR-011a Shared packages | ✅ | T015-T079 | Phase 2 covers all |
 | FR-011b @universo/ scope | ✅ | - | Naming in tasks |
@@ -110,17 +110,27 @@ The following tasks don't have direct requirement mapping but are valid infrastr
 
 ## Metrics
 
+### Current Status
+
 | Metric | Value |
 |--------|-------|
 | Total Requirements (FR-*) | 37 |
-| Total Tasks | 175 |
-| Coverage % (requirements with ≥1 task) | 92% |
-| Ambiguity Count | 4 |
-| Duplication Count | 1 |
-| Critical Issues Count | 1 |
-| High Issues Count | 3 |
-| Medium Issues Count | 8 |
-| Low Issues Count | 4 |
+| Total Tasks | 189 |
+| Coverage % (requirements with ≥1 task) | 95% |
+| Critical Issues | 0 |
+| High Issues | 1 |
+| Medium Issues | 5 |
+| Low Issues | 3 |
+
+### Changes Summary
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Total Tasks | 175 | 189 | +14 (app-frt) |
+| Coverage % | 92% | 95% | +3% |
+| Critical Issues | 1 | 0 | -1 (resolved) |
+| High Issues | 3 | 1 | -2 (resolved) |
+| Issues Resolved | - | 5 | +5 |
 
 ---
 
@@ -201,34 +211,39 @@ Update spec.md to reference Svelte-compatible patterns instead of "React Query h
 
 ## Next Actions
 
-### If CRITICAL Issues Exist (YES - 1 Critical):
+### Critical Issues Status: [RESOLVED]
 
-1. **Add app-frt package tasks** to Phase 3 (US1) to provide working development server
-2. **Verify tasks create runnable application** not just library packages
+The following critical issues have been addressed:
 
-### Improvement Suggestions:
+1. ✅ **app-frt package tasks added** - Tasks T079a-T079n added to Phase 2 to create SvelteKit application shell
+2. ✅ **Duplicate Clusters Pattern removed** - Duplicate section removed from spec.md
+3. ✅ **React Query reference fixed** - Updated to mention Svelte stores and SvelteKit load functions
 
-1. Remove duplicate Clusters Pattern section from spec.md
-2. Add explicit task for husky/lint-staged setup
-3. Consider adding auth-frt package for Svelte auth components
-4. Update api-client spec to mention SvelteKit load functions instead of React Query
+### Remaining Improvement Opportunities (Non-Critical):
+
+1. **Consider auth-frt package** - For Svelte authentication UI components (can be added in future features)
+2. **Detailed @universo/types subtasks** - Tasks reference subdirectories but could be more specific
+3. **React Repository analysis task** - Consider adding explicit task for systematic React repo analysis
+
+### Recommended Next Steps:
+
+1. ✅ Analysis complete - proceed to `/speckit.implement` when ready
+2. Create GitHub Issues for each phase before implementation
+3. Follow the task sequence defined in tasks.md
 
 ---
 
-## Remediation Plan
+## Applied Remediations Summary
 
-Would you like me to suggest concrete remediation edits for the top issues?
-
-**Available Remediation Actions**:
-
-1. **Spec Cleanup**: Remove duplicate Clusters Pattern section
-2. **Task Addition**: Add app-frt package tasks for SvelteKit application shell
-3. **Task Addition**: Add auth-frt package tasks for Svelte authentication UI
-4. **Spec Update**: Fix React Query reference to Svelte-compatible pattern
-5. **Task Reordering**: Ensure application shell is created in Phase 3 for working dev server
+| Issue | Action Taken | File(s) Modified |
+|-------|--------------|------------------|
+| A2 - Missing app-frt | Added 14 new tasks (T079a-T079n) for SvelteKit shell | tasks.md, plan.md |
+| A8 - Duplicate spec | Removed duplicate Clusters Pattern section | spec.md |
+| A10 - No dev server | app-frt provides dev server entry point | tasks.md |
+| A13 - React Query | Updated to Svelte stores pattern | spec.md |
 
 ---
 
 **Analysis Completed**: 2025-11-25  
 **Analyst**: GitHub Copilot AI Agent  
-**Next Step**: Await user approval for remediation actions
+**Status**: [READY FOR IMPLEMENTATION]
