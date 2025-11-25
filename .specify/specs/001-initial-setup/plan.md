@@ -159,12 +159,29 @@ Establish the foundational monorepo architecture for Universo Platformo Svelte w
 │   │   │   └── README-RU.md
 │   │   └── README.md
 │   │
-│   └── ui-theme/                # @universo/ui-theme - SMUI theme config
+│   ├── ui-theme/                # @universo/ui-theme - SMUI theme config
+│   │   ├── base/
+│   │   │   ├── src/
+│   │   │   │   ├── theme.config.ts
+│   │   │   │   ├── components/  # Base UI components
+│   │   │   │   └── index.ts
+│   │   │   ├── package.json
+│   │   │   ├── tsconfig.json
+│   │   │   ├── README.md
+│   │   │   └── README-RU.md
+│   │   └── README.md
+│   │
+│   └── app-frt/                 # @universo/app-frt - SvelteKit application shell
 │       ├── base/
 │       │   ├── src/
-│       │   │   ├── theme.config.ts
-│       │   │   ├── components/  # Base UI components
-│       │   │   └── index.ts
+│       │   │   ├── routes/      # SvelteKit routes
+│       │   │   │   ├── +layout.svelte
+│       │   │   │   ├── +page.svelte
+│       │   │   │   └── +error.svelte
+│       │   │   ├── app.html     # HTML template
+│       │   │   └── app.d.ts     # Type declarations
+│       │   ├── svelte.config.js
+│       │   ├── vite.config.ts
 │       │   ├── package.json
 │       │   ├── tsconfig.json
 │       │   ├── README.md
@@ -184,7 +201,7 @@ Establish the foundational monorepo architecture for Universo Platformo Svelte w
 └── specs/                       # Feature specifications
 ```
 
-**Structure Decision**: Monorepo with PNPM workspaces. ALL functionality implemented as packages in `packages/` directory. Root level contains ONLY configuration files, build orchestration, and package manager files. NO feature code, business logic, or UI components outside packages/. Each package has `base/` subdirectory for primary implementation, enabling future alternative implementations. Frontend/backend separation enforced by `-frt`/`-srv` suffixes (future feature packages). Shared packages (@universo/types, @universo/utils, @universo/api-client, @universo/i18n) eliminate code duplication. Each package designed as independent, extractable module for future migration to standalone repositories.
+**Structure Decision**: Monorepo with PNPM workspaces. ALL functionality implemented as packages in `packages/` directory. Root level contains ONLY configuration files, build orchestration, and package manager files. NO feature code, business logic, or UI components outside packages/. Each package has `base/` subdirectory for primary implementation, enabling future alternative implementations. Frontend/backend separation enforced by `-frt`/`-srv` suffixes (future feature packages). Shared packages (@universo/types, @universo/utils, @universo/api-client, @universo/i18n) eliminate code duplication. The `app-frt` package serves as the main SvelteKit application shell that ties all shared packages together and provides the development server entry point. Each package designed as independent, extractable module for future migration to standalone repositories.
 
 ## Complexity Tracking
 
