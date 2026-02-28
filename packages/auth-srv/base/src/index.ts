@@ -17,5 +17,6 @@ export {
     SESSION_COOKIE_MAX_AGE,
     serializeSession,
     deserializeSession,
+    deserializeSessionAllowExpired,
     getSessionCookieOptions
 } from './session.js'

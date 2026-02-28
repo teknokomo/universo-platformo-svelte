@@ -8,6 +8,7 @@
 import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { getAuthService } from '$lib/server/supabase'
+import { isValidEmail } from '$lib/server/validation'
 
 export const POST: RequestHandler = async ({ request }) => {
     let body: {
@@ -27,6 +28,14 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (!email || !password) {
         return json({ message: 'Email and password are required' }, { status: 400 })
+    }
+
+    if (!isValidEmail(email)) {
+        return json({ message: 'Invalid email address' }, { status: 400 })
+    }
+
+    if (password.length < 8) {
+        return json({ message: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
     try {

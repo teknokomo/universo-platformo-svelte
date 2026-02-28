@@ -2,12 +2,15 @@
  * POST /api/auth/login
  *
  * Authenticates a user with email and password via Supabase.
- * Sets an HTTP-only session cookie on success.
+ * Sets an HMAC-signed HTTP-only session cookie on success.
  */
 
 import { json } from '@sveltejs/kit'
+import { dev } from '$app/environment'
 import type { RequestHandler } from './$types'
 import { getAuthService } from '$lib/server/supabase'
+import { getSessionSecret } from '$lib/server/session'
+import { isValidEmail } from '$lib/server/validation'
 import { serializeSession, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@universo/auth-srv'
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -25,11 +28,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         return json({ message: 'Email and password are required' }, { status: 400 })
     }
 
+    if (!isValidEmail(email)) {
+        return json({ message: 'Invalid email address' }, { status: 400 })
+    }
+
     try {
         const authService = getAuthService()
         const result = await authService.login({ email, password })
 
-        // Store session in HTTP-only cookie
         const sessionData = {
             userId: result.session.userId,
             email: result.session.email,
@@ -38,9 +44,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             expiresAt: result.session.expiresAt
         }
 
-        const isProduction = process.env.NODE_ENV === 'production'
-        cookies.set(SESSION_COOKIE_NAME, serializeSession(sessionData), {
-            ...getSessionCookieOptions(isProduction),
+        const secret = getSessionSecret()
+        cookies.set(SESSION_COOKIE_NAME, serializeSession(sessionData, secret), {
+            ...getSessionCookieOptions(!dev),
             path: '/'
         })
 

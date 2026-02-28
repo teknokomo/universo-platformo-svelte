@@ -6,7 +6,7 @@
  * This mirrors the React version but uses Supabase directly instead of TypeORM.
  */
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { OnboardingItems, JoinItemsRequest, JoinItemsResponse } from './types.js'
 
 export interface OnboardingServiceConfig {
@@ -15,16 +15,11 @@ export interface OnboardingServiceConfig {
 }
 
 export class OnboardingService {
-    private readonly supabaseUrl: string
-    private readonly supabaseServiceRoleKey: string
+    private readonly _client: SupabaseClient
 
     constructor(config: OnboardingServiceConfig) {
-        this.supabaseUrl = config.supabaseUrl
-        this.supabaseServiceRoleKey = config.supabaseServiceRoleKey
-    }
-
-    private get client() {
-        return createClient(this.supabaseUrl, this.supabaseServiceRoleKey, {
+        // Create the Supabase admin client once and reuse it across all method calls
+        this._client = createClient(config.supabaseUrl, config.supabaseServiceRoleKey, {
             auth: {
                 autoRefreshToken: false,
                 persistSession: false
@@ -42,7 +37,7 @@ export class OnboardingService {
     async getOnboardingItems(userId: string): Promise<OnboardingItems> {
         try {
             // Check if user has completed onboarding via user metadata
-            const { data: userData } = await this.client.auth.admin.getUserById(userId)
+            const { data: userData } = await this._client.auth.admin.getUserById(userId)
 
             const onboardingCompleted = userData?.user?.user_metadata?.onboarding_completed === true
 
@@ -71,7 +66,7 @@ export class OnboardingService {
     async joinItems(userId: string, data: JoinItemsRequest): Promise<JoinItemsResponse> {
         try {
             // Mark onboarding as completed in user metadata
-            await this.client.auth.admin.updateUserById(userId, {
+            await this._client.auth.admin.updateUserById(userId, {
                 user_metadata: {
                     onboarding_completed: true
                 }
