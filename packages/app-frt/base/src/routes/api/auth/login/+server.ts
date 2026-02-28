@@ -32,8 +32,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         return json({ message: 'Invalid email address' }, { status: 400 })
     }
 
+    let authService
+    let secret: string
     try {
-        const authService = getAuthService()
+        authService = getAuthService()
+        secret = getSessionSecret()
+    } catch (err) {
+        console.error('[login] Server configuration error:', err)
+        return json({ message: 'Internal server error' }, { status: 500 })
+    }
+
+    try {
         const result = await authService.login({ email, password })
 
         if (!result.session) {
@@ -48,7 +57,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
             expiresAt: result.session.expiresAt
         }
 
-        const secret = getSessionSecret()
         cookies.set(SESSION_COOKIE_NAME, serializeSession(sessionData, secret), {
             ...getSessionCookieOptions(!dev),
             path: '/'
@@ -57,12 +65,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         return json({ user: result.user })
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Login failed'
-
-        // Distinguish authentication failures from internal server errors
-        const isServerError =
-            message.includes('environment variable') ||
-            message.includes('SESSION_SECRET') ||
-            message.includes('Missing Supabase')
-        return json({ message: isServerError ? 'Internal server error' : message }, { status: isServerError ? 500 : 401 })
+        return json({ message }, { status: 401 })
     }
 }

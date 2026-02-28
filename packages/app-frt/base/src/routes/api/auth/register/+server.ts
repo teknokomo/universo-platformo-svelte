@@ -38,18 +38,20 @@ export const POST: RequestHandler = async ({ request }) => {
         return json({ message: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
+    let authService
     try {
-        const authService = getAuthService()
+        authService = getAuthService()
+    } catch (err) {
+        console.error('[register] Server configuration error:', err)
+        return json({ message: 'Internal server error' }, { status: 500 })
+    }
+
+    try {
         const result = await authService.register({ email, password, termsAccepted, privacyAccepted })
 
         return json({ user: result.user, message: 'Registration successful. Check your email to confirm.' }, { status: 201 })
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Registration failed'
-
-        // Distinguish input/auth errors from internal server errors
-        const isServerError =
-            message.includes('environment variable') ||
-            message.includes('Missing Supabase')
-        return json({ message: isServerError ? 'Internal server error' : message }, { status: isServerError ? 500 : 400 })
+        return json({ message }, { status: 400 })
     }
 }
