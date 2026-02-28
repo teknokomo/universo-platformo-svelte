@@ -1,0 +1,19 @@
+{
+    "name": "universo-platformo-svelte",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Universo Platformo – Svelte monorepo",
+    "scripts": {
+        "dev": "pnpm --filter app-frt dev",
+        "build": "pnpm --filter app-frt build",
+        "preview": "pnpm --filter app-frt preview",
+        "check": "pnpm -r run check",
+        "lint": "pnpm -r run lint",
+        "clean": "pnpm -r run clean"
+    },
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=8"
+    },
+    "packageManager": "pnpm@8.15.0"
+}

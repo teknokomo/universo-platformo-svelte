@@ -1,0 +1,46 @@
+{
+    "name": "@universo/start-frt",
+    "version": "0.1.0",
+    "description": "Start page frontend component library (Svelte)",
+    "type": "module",
+    "svelte": "./src/index.ts",
+    "main": "./src/index.ts",
+    "module": "./src/index.ts",
+    "types": "./src/index.ts",
+    "exports": {
+        ".": {
+            "svelte": "./src/index.ts",
+            "types": "./src/index.ts",
+            "import": "./src/index.ts"
+        },
+        "./StartPage": "./src/views/StartPage.svelte",
+        "./GuestStartPage": "./src/views/GuestStartPage.svelte",
+        "./AuthenticatedStartPage": "./src/views/AuthenticatedStartPage.svelte",
+        "./StartFooter": "./src/components/StartFooter.svelte",
+        "./OnboardingWizard": "./src/components/OnboardingWizard.svelte",
+        "./CompletionStep": "./src/components/CompletionStep.svelte",
+        "./Hero": "./src/views/components/Hero.svelte",
+        "./Testimonials": "./src/views/components/Testimonials.svelte"
+    },
+    "scripts": {
+        "check": "svelte-check --tsconfig ./tsconfig.json",
+        "lint": "svelte-check --tsconfig ./tsconfig.json",
+        "clean": "rimraf dist"
+    },
+    "keywords": ["universo", "start", "svelte", "frontend"],
+    "author": "Teknokomo",
+    "license": "Omsk Open License",
+    "dependencies": {
+        "svelte": "^4.2.0"
+    },
+    "devDependencies": {
+        "@sveltejs/vite-plugin-svelte": "^3.0.0",
+        "svelte-check": "^3.6.0",
+        "svelte-preprocess": "^5.1.4",
+        "typescript": "^5.8.3",
+        "rimraf": "^5.0.5"
+    },
+    "peerDependencies": {
+        "svelte": ">=4"
+    }
+}

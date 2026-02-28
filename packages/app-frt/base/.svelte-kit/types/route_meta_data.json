@@ -1,0 +1,34 @@
+{
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.server.ts",
+		"src/routes/+layout.ts",
+		"src/routes/+layout.server.ts"
+	],
+	"/api/auth/csrf": [
+		"src/routes/api/auth/csrf/+server.ts"
+	],
+	"/api/auth/login": [
+		"src/routes/api/auth/login/+server.ts"
+	],
+	"/api/auth/logout": [
+		"src/routes/api/auth/logout/+server.ts"
+	],
+	"/api/auth/me": [
+		"src/routes/api/auth/me/+server.ts"
+	],
+	"/api/auth/register": [
+		"src/routes/api/auth/register/+server.ts"
+	],
+	"/api/v1/onboarding/items": [
+		"src/routes/api/v1/onboarding/items/+server.ts"
+	],
+	"/api/v1/onboarding/join": [
+		"src/routes/api/v1/onboarding/join/+server.ts"
+	],
+	"/auth": [
+		"src/routes/auth/+page.server.ts",
+		"src/routes/+layout.ts",
+		"src/routes/+layout.server.ts"
+	]
+}
