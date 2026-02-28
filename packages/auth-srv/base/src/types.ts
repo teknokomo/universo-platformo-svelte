@@ -31,7 +31,7 @@ export interface RegisterCredentials {
 
 export interface AuthResult {
     user: AuthUser
-    session: AuthSession
+    session: AuthSession | null
 }
 
 export interface SessionCookieData {

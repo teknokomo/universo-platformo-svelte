@@ -29,6 +29,8 @@
     let campaigns: Array<{ id: string; name: string; description?: string; isSelected: boolean }> = []
     let clusters: Array<{ id: string; name: string; description?: string; isSelected: boolean }> = []
 
+    let itemsLoaded = false
+
     async function loadItems() {
         loading = true
         error = null
@@ -46,6 +48,7 @@
             error = err instanceof Error ? err.message : 'Failed to load items'
         } finally {
             loading = false
+            itemsLoaded = true
         }
     }
 
@@ -76,7 +79,7 @@
         return list.includes(id) ? list.filter((x) => x !== id) : [...list, id]
     }
 
-    $: if (step === 1 && projects.length === 0 && !loading) {
+    $: if (step === 1 && !itemsLoaded && !loading) {
         loadItems()
     }
 </script>

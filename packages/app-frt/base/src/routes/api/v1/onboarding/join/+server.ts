@@ -9,16 +9,16 @@ import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 import { getOnboardingService } from '$lib/server/onboarding'
 
+function isStringArray(value: unknown): value is string[] {
+    return Array.isArray(value) && value.every((v) => typeof v === 'string')
+}
+
 export const POST: RequestHandler = async ({ request, locals }) => {
     if (!locals.user) {
         return json({ message: 'Not authenticated' }, { status: 401 })
     }
 
-    let body: {
-        projectIds?: string[]
-        campaignIds?: string[]
-        clusterIds?: string[]
-    }
+    let body: Record<string, unknown>
 
     try {
         body = await request.json()
@@ -26,7 +26,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         return json({ message: 'Invalid request body' }, { status: 400 })
     }
 
-    const { projectIds = [], campaignIds = [], clusterIds = [] } = body
+    const projectIds = body.projectIds ?? []
+    const campaignIds = body.campaignIds ?? []
+    const clusterIds = body.clusterIds ?? []
+
+    if (!isStringArray(projectIds) || !isStringArray(campaignIds) || !isStringArray(clusterIds)) {
+        return json({ message: 'projectIds, campaignIds, and clusterIds must be arrays of strings' }, { status: 400 })
+    }
 
     try {
         const onboardingService = getOnboardingService()

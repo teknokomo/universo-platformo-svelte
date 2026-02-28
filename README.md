@@ -131,7 +131,7 @@ When a token expires, the server attempts a silent refresh via the stored refres
 
 ### Prerequisites
 
-- Node.js ≥ 18
+- Node.js ≥ 20
 - PNPM ≥ 8 (`npm install -g pnpm`)
 - A [Supabase](https://supabase.com/) project
 

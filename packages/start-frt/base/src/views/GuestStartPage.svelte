@@ -39,10 +39,7 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        background-image: url('/background-image.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
+        background: linear-gradient(135deg, #e8f0fe 0%, #f0f4f8 50%, #e1ecf7 100%);
         position: relative;
     }
 

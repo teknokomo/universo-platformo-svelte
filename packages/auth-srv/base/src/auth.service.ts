@@ -85,13 +85,15 @@ export class AuthService {
         }
 
         // Session may be null if email confirmation is required
-        const session: AuthSession = {
-            userId: data.user.id,
-            email: user.email,
-            accessToken: data.session?.access_token ?? '',
-            refreshToken: data.session?.refresh_token,
-            expiresAt: data.session?.expires_at
-        }
+        const session: AuthSession | null = data.session
+            ? {
+                  userId: data.user.id,
+                  email: user.email,
+                  accessToken: data.session.access_token,
+                  refreshToken: data.session.refresh_token,
+                  expiresAt: data.session.expires_at
+              }
+            : null
 
         return { user, session }
     }

@@ -34,6 +34,7 @@ export const handle: Handle = async ({ event, resolve }) => {
             secret = getSessionSecret()
         } catch (err) {
             console.error('[hooks.server] SESSION_SECRET unavailable:', err)
+            event.cookies.delete(SESSION_COOKIE_NAME, { path: '/' })
             event.locals.user = null
             return resolve(event)
         }

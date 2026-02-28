@@ -36,6 +36,10 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         const authService = getAuthService()
         const result = await authService.login({ email, password })
 
+        if (!result.session) {
+            return json({ message: 'Login failed: no session returned' }, { status: 401 })
+        }
+
         const sessionData = {
             userId: result.session.userId,
             email: result.session.email,

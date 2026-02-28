@@ -37,7 +37,12 @@ export class OnboardingService {
     async getOnboardingItems(userId: string): Promise<OnboardingItems> {
         try {
             // Check if user has completed onboarding via user metadata
-            const { data: userData } = await this._client.auth.admin.getUserById(userId)
+            const { data: userData, error } = await this._client.auth.admin.getUserById(userId)
+
+            if (error) {
+                console.error('[OnboardingService] getUserById error:', error.message)
+                throw error
+            }
 
             const onboardingCompleted = userData?.user?.user_metadata?.onboarding_completed === true
 
@@ -66,11 +71,16 @@ export class OnboardingService {
     async joinItems(userId: string, data: JoinItemsRequest): Promise<JoinItemsResponse> {
         try {
             // Mark onboarding as completed in user metadata
-            await this._client.auth.admin.updateUserById(userId, {
+            const { error } = await this._client.auth.admin.updateUserById(userId, {
                 user_metadata: {
                     onboarding_completed: true
                 }
             })
+
+            if (error) {
+                console.error('[OnboardingService] updateUserById error:', error.message)
+                throw error
+            }
 
             return {
                 success: true,
