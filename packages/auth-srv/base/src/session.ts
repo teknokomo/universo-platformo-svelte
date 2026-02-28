@@ -24,6 +24,9 @@ export const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days in seconds
  *                least 32 characters long.
  */
 export function serializeSession(data: SessionCookieData, secret: string): string {
+    if (secret.length < 32) {
+        throw new Error('Session secret must be at least 32 characters long')
+    }
     const payload = Buffer.from(JSON.stringify(data)).toString('base64url')
     const sig = createHmac('sha256', secret).update(payload).digest('base64url')
     return `${payload}.${sig}`

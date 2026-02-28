@@ -56,12 +56,7 @@ export class OnboardingService {
             }
         } catch (error) {
             console.error('[OnboardingService] Failed to get onboarding items:', error)
-            return {
-                projects: [],
-                campaigns: [],
-                clusters: [],
-                onboardingCompleted: false
-            }
+            throw new Error('Failed to retrieve onboarding items')
         }
     }
 

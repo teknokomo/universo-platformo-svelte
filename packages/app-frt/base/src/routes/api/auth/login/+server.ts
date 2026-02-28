@@ -57,6 +57,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         return json({ user: result.user })
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Login failed'
-        return json({ message }, { status: 401 })
+
+        // Distinguish authentication failures from internal server errors
+        const isServerError =
+            message.includes('environment variable') ||
+            message.includes('SESSION_SECRET') ||
+            message.includes('Missing Supabase')
+        return json({ message: isServerError ? 'Internal server error' : message }, { status: isServerError ? 500 : 401 })
     }
 }

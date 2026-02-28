@@ -45,6 +45,11 @@ export const POST: RequestHandler = async ({ request }) => {
         return json({ user: result.user, message: 'Registration successful. Check your email to confirm.' }, { status: 201 })
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Registration failed'
-        return json({ message }, { status: 400 })
+
+        // Distinguish input/auth errors from internal server errors
+        const isServerError =
+            message.includes('environment variable') ||
+            message.includes('Missing Supabase')
+        return json({ message: isServerError ? 'Internal server error' : message }, { status: isServerError ? 500 : 400 })
     }
 }

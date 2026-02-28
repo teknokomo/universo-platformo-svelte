@@ -19,7 +19,7 @@
     let loading = false
     let error: string | null = null
 
-    const steps = ['Welcome', 'Projects', 'Campaigns', 'Clusters', 'Complete']
+    const steps = ['Welcome', 'Projects', 'Campaigns', 'Clusters']
 
     let selectedProjects: string[] = []
     let selectedCampaigns: string[] = []
